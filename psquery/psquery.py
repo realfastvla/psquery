@@ -166,7 +166,9 @@ def ps1metadata(table="mean",release="dr1",
 
 
 def parse_objinfoflag(objinfoflag):
-    """
+    """ Get object flags.
+    See reference info at https://outerspace.stsci.edu/display/PANSTARRS/PS1+Object+Flags and
+    https://outerspace.stsci.edu/display/PANSTARRS/PS1+Database+object+and+detection+tables+for+bad+skycells
     """
 
     k = objinfoflag
