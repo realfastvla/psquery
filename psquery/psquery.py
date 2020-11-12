@@ -29,17 +29,26 @@ def query_radec(ra, dec, ndet=5, radius=5/3600):
         print('Found one')
         rao, deco = lines[1].split(',')[1:3]
         coo = coordinates.SkyCoord(float(rao), float(deco), unit=(units.deg, units.deg))
-        print("Source {0} separated by {1}".format(coo, co.separation(coo).to_value(units.arcsec)))
-        return coo
-    elif len(lines) >3:
+        sep = co.separation(coo).to_value(units.arcsec)))
+        print("Source {0} separated by {1}".format(coo, sep))
+        return sep, lines[1]
+    elif len(lines) > 3:
         print('Found multiple:')
         print(lines)
-        coos = []
+#        coos = []
+        line_min = ''
+        sep_min = radius*3600
         for line in lines[1:]:
             if line:
                 rao, deco = line.split(',')[1:3]
-                coos.append(coordinates.SkyCoord(float(rao), float(deco), unit=(units.deg, units.deg)))
-        return coos
+                coo = coordinates.SkyCoord(float(rao), float(deco), unit=(units.deg, units.deg))
+                sep = co.separation(coo).to_value(units.arcsec)))
+                if sep < sep_min:
+                    line_min = line
+                    sep_min = sep
+#                coos.append(coordinates.SkyCoord(float(rao), float(deco), unit=(units.deg, units.deg)))
+#        return coos
+        return sep, line_min
     else:
         print('Nothing there.')
         return None
