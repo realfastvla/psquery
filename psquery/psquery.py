@@ -10,9 +10,11 @@ from astropy.table import Table
 from astropy import coordinates, units
 
 
-def query_radec(ra, dec, ndet=5, radius=5/3600):
+def query_radec(ra, dec, ndet=5, radius=5/3600, verbose=False):
     """ cone search in pan-starrs dr2
+    Returns number of tuple with number of matches, separation in arcsec to nearest, and photometry of nearest.
     """
+
     if ndet:
         constraints = {'nDetections.gt': ndet}
     else:
@@ -23,18 +25,21 @@ def query_radec(ra, dec, ndet=5, radius=5/3600):
     
     columnstr = """objID,raMean,decMean,nDetections,ng,nr,ni,nz,ny, gMeanPSFMag,rMeanPSFMag,iMeanPSFMag,zMeanPSFMag,yMeanPSFMag""".split(',')
     columns = [x.strip() for x in columnstr if x and not x.startswith('#')]
-    results = ps1cone(ra, dec, radius, release='dr2', columns=columns, verbose=True, **constraints)
+    results = ps1cone(ra, dec, radius, release='dr2', columns=columns, verbose=verbose, **constraints)
     lines = results.split('\n')
     if len(lines) == 3:
-        print('Found one')
+        if verbose:
+            print('Found one')
         rao, deco = lines[1].split(',')[1:3]
         coo = coordinates.SkyCoord(float(rao), float(deco), unit=(units.deg, units.deg))
         sep = co.separation(coo).to_value(units.arcsec)
-        print("Source {0} separated by {1}".format(coo, sep))
-        return sep, lines[1]
+        if verbose:
+            print("Source {0} separated by {1}".format(coo, sep))
+        return 1, sep, lines[1]
     elif len(lines) > 3:
-        print('Found multiple:')
-        print(lines)
+        if verbose:
+            print('Found multiple:')
+            print(lines)
 #        coos = []
         line_min = ''
         sep_min = radius*3600
@@ -48,9 +53,10 @@ def query_radec(ra, dec, ndet=5, radius=5/3600):
                     sep_min = sep
 #                coos.append(coordinates.SkyCoord(float(rao), float(deco), unit=(units.deg, units.deg)))
 #        return coos
-        return sep_min, line_min
+        return len(lines)-2, sep_min, line_min
     else:
-        print('Nothing there.')
+        if verbose:
+            print('Nothing there.')
         return None
 
 

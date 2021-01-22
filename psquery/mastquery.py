@@ -13,7 +13,7 @@ if not os.environ.get('CASJOBS_PW'):
     os.environ['CASJOBS_PW'] = getpass.getpass('Enter Casjobs password:')
 
 
-def cone_ps1strm(ra, dec, radius=5/3600, selectcol=['objID', 'raMean', 'decMean', 'z_phot0', 'z_photErr']):
+def cone_ps1strm(ra, dec, radius=5, selectcol=['objID', 'raMean', 'decMean', 'z_phot0', 'z_photErr']):
     """ cone search in pan-starrs strm classification and photo-z
     ra, dec in degrees, radius in arcsec.
     """
