@@ -59,3 +59,19 @@ def fixcolnames(tab):
         newname = m.group('name')
         tab.rename_column(c,newname)
     return tab
+
+
+def cone_emline(ra, dec, size=5, selectcol=['specObjID', 'ra', 'dec', 'z', 'zErr', 'bpt', 'Flux_Ha_6562', 'Flux_NII_6583', 'Flux_Hb_4861', 'Flux_OIII_4363']):
+    """ box search in emissionLinesPort table
+    ra, dec in degrees, size in arcsec.
+    Columns described in http://skyserver.sdss.org/dr16/en/help/browser/browser.aspx?cmd=description+emissionLinesPort+U#&&history=description+emissionLinesPort+U
+    """
+
+    query = """SELECT TOP 10 emline.*\nFROM emissionLinesPort AS emline\nWHERE ra > {0} and ra < {1}\nAND dec > {2} and dec < {3}""".format(ra-size/2, ra+size/2, dec-size/2, dec+size/2)
+  
+    jobs = mastcasjobs.MastCasJobs(context="SDSSDR14")
+    tab = jobs.quick(query, task_name="python range search")
+
+    return tab[selectcol]
+
+
