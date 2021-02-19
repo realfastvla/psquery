@@ -23,7 +23,7 @@ def cone_ps1strm(ra, dec, radius=5, selectcol=['objID', 'raMean', 'decMean', 'z_
     query = """SELECT ps1_strm.*, nearby.distance\nFROM fGetNearbyObjEq({0}, {1}, {2}/60.0) AS nearby\nINNER JOIN catalogRecordRowStore AS ps1_strm\nON ps1_strm.objID = nearby.objID""".format(ra, dec, radius)
   
     jobs = mastcasjobs.MastCasJobs(context="HLSP_PS1_STRM")
-    tab = jobs.quick(query, task_name="python cone search")
+    tab = jobs.quick(query, task_name="python ps1strm cone search")
 
     return tab[selectcol]
 
@@ -61,17 +61,20 @@ def fixcolnames(tab):
     return tab
 
 
-def cone_emline(ra, dec, size=5, selectcol=['specObjID', 'ra', 'dec', 'z', 'zErr', 'bpt', 'Flux_Ha_6562', 'Flux_NII_6583', 'Flux_Hb_4861', 'Flux_OIII_4363']):
+def cone_emline(ra, dec, radius=5, selectcol=['specObjID', 'ra', 'dec', 'z', 'zErr', 'bpt', 'Flux_Ha_6562', 'Flux_NII_6583', 'Flux_Hb_4861', 'Flux_OIII_4363']):
     """ box search in emissionLinesPort table
     ra, dec in degrees, size in arcsec.
     Columns described in http://skyserver.sdss.org/dr16/en/help/browser/browser.aspx?cmd=description+emissionLinesPort+U#&&history=description+emissionLinesPort+U
     """
 
-    query = """SELECT TOP 10 emline.*\nFROM emissionLinesPort AS emline\nWHERE ra > {0} and ra < {1}\nAND dec > {2} and dec < {3}""".format(ra-size/2, ra+size/2, dec-size/2, dec+size/2)
+# dumb way
+#    query = """SELECT TOP 10 emline.*\nFROM emissionLinesPort AS emline\nWHERE ra > {0} and ra < {1}\nAND dec > {2} and dec < {3}""".format(ra-size/2, ra+size/2, dec-size/2, dec+size/2)
+    colstr = ', '
+    query = """SELECT TOP 10 G.specobjID, G.ra, G.dec, G.z, G.bpt, G.Flux_Ha_6562, G.Flux_NII_6583, G.Flux_Hb_4861, G.Flux_OIII_4363, N.distance\nFROM emissionLinesPort as G\nJOIN dbo.fGetNearbySpecObjEq({0}, {1}, {2}) AS N\nON G.specobjID = N.specobjID""".format(ra, dec, radius/60)
   
     jobs = mastcasjobs.MastCasJobs(context="SDSSDR14")
-    tab = jobs.quick(query, task_name="python range search")
+    tab = jobs.quick(query, task_name="python emission line cone search")
 
-    return tab[selectcol]
+    return tab
 
 
