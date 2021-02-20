@@ -61,16 +61,17 @@ def fixcolnames(tab):
     return tab
 
 
-def cone_emline(ra, dec, radius=5, selectcol=['specObjID', 'ra', 'dec', 'z', 'zErr', 'bpt', 'Flux_Ha_6562', 'Flux_NII_6583', 'Flux_Hb_4861', 'Flux_OIII_4363']):
+def cone_emline(ra, dec, radius=5, selectcol=['specObjID', 'ra', 'dec', 'z', 'zErr', 'bpt', 'Flux_Ha_6562', 'Flux_NII_6583', 'Flux_Hb_4861', 'Flux_OIII_5006']):
     """ box search in emissionLinesPort table
     ra, dec in degrees, size in arcsec.
     Columns described in http://skyserver.sdss.org/dr16/en/help/browser/browser.aspx?cmd=description+emissionLinesPort+U#&&history=description+emissionLinesPort+U
+    TODO: use selectcol in sql query
     """
 
 # dumb way
 #    query = """SELECT TOP 10 emline.*\nFROM emissionLinesPort AS emline\nWHERE ra > {0} and ra < {1}\nAND dec > {2} and dec < {3}""".format(ra-size/2, ra+size/2, dec-size/2, dec+size/2)
     colstr = ', '
-    query = """SELECT TOP 10 G.specobjID, G.ra, G.dec, G.z, G.bpt, G.Flux_Ha_6562, G.Flux_NII_6583, G.Flux_Hb_4861, G.Flux_OIII_4363, N.distance\nFROM emissionLinesPort as G\nJOIN dbo.fGetNearbySpecObjEq({0}, {1}, {2}) AS N\nON G.specobjID = N.specobjID""".format(ra, dec, radius/60)
+    query = """SELECT TOP 10 G.specobjID, G.ra, G.dec, G.z, G.bpt, G.Flux_Ha_6562, G.Flux_NII_6583, G.Flux_Hb_4861, G.Flux_OIII_5006, N.distance\nFROM emissionLinesPort as G\nJOIN dbo.fGetNearbySpecObjEq({0}, {1}, {2}) AS N\nON G.specobjID = N.specobjID""".format(ra, dec, radius/60)
   
     jobs = mastcasjobs.MastCasJobs(context="SDSSDR14")
     tab = jobs.quick(query, task_name="python emission line cone search")
