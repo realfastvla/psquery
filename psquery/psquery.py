@@ -8,7 +8,7 @@ import http.client as httplib
 from astropy.io import ascii 
 from astropy.table import Table 
 from astropy import coordinates, units
-
+import mastcasjobs
 
 def query_radec(ra, dec, ndet=5, radius=5/3600, verbose=False):
     """ cone search in pan-starrs dr2
@@ -58,6 +58,18 @@ def query_radec(ra, dec, ndet=5, radius=5/3600, verbose=False):
         if verbose:
             print('Nothing there.')
         return None
+
+def cone_ps1_casjobs(ra, dec, radius=5, ndet=1):
+    """ cone search in ps1 via casjobs (similar to mastquery PS1STRM function)
+    ra, dec in degrees, radius in arcsec.
+    """
+
+    query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gMeanPSFMag, m.rMeanPSFMag, m.iMeanPSFMag, m.zMeanPSFMag, m.yMeanPSFMag, d.gkronRad, d.rkronRad\nfrom fGetNearestObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid=nb.objid and nDetections>{ndet}\ninner join MeanObject m on o.objid=m.objid\ninner join StackObjectAttributes d on o.objid=d.objid""".format(ra, dec, radius, ndet)
+  
+    jobs = mastcasjobs.MastCasJobs(context="PanSTARRS_DR2")
+    tab = jobs.quick(query, task_name="python ps1 DR2 cone search")
+
+    return tab
 
 
 def ps1cone(ra,dec,radius,table="mean",release="dr2",format="csv",columns=None,
