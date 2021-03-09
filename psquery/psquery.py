@@ -11,7 +11,8 @@ from astropy import coordinates, units
 import mastcasjobs
 
 def query_radec(ra, dec, ndet=5, radius=5/3600, verbose=False):
-    """ cone search in pan-starrs dr2
+    """ cone search in pan-starrs dr2.
+    radius is in degrees.
     Returns number of tuple with number of matches, separation in arcsec to nearest, and photometry of nearest.
     """
 
@@ -59,15 +60,32 @@ def query_radec(ra, dec, ndet=5, radius=5/3600, verbose=False):
             print('Nothing there.')
         return None
 
-def cone_ps1_casjobs(ra, dec, radius=5, ndet=1):
+def cone_ps1_casjobs(ra, dec, radius=5, ndet=1, nr=1):
     """ cone search in ps1 via casjobs (similar to mastquery PS1STRM function)
     ra, dec in degrees, radius in arcsec.
+    ndet, nr define number of total and r band detections required.
+    Gets primary detection from stacks for rkronRad.
     """
 
-    query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gMeanPSFMag, m.rMeanPSFMag, m.iMeanPSFMag, m.zMeanPSFMag, m.yMeanPSFMag, d.gkronRad, d.rkronRad\nfrom fGetNearestObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid=nb.objid and nDetections>{ndet}\ninner join MeanObject m on o.objid=m.objid\ninner join StackObjectAttributes d on o.objid=d.objid""".format(ra, dec, radius, ndet)
+    query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gMeanPSFMag, m.rMeanPSFMag, m.iMeanPSFMag, m.zMeanPSFMag, m.yMeanPSFMag, m.rMeanKronMag, d.rkronRad\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join MeanObject m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(ra, dec, radius, ndet, nr)
   
     jobs = mastcasjobs.MastCasJobs(context="PanSTARRS_DR2")
     tab = jobs.quick(query, task_name="python ps1 DR2 cone search")
+
+    return tab
+
+
+def cone_ps1_psc(ra, dec, radius=5):
+    """ cone search in ps1 PSC via casjobs (similar to mastquery PS1STRM function)
+    ra, dec in degrees, radius in arcsec.
+    See Tachibana & Miller (2018; https://iopscience.iop.org/article/10.1088/1538-3873/aae3d9).
+    Optimal extended source has ps_score<0.83.
+    """
+
+    query = f"""select p.objID, p.ps_score, p.raMean, p.decMean\nfrom pointsource_magnitudes_view as p\ninner join fGetNearbyObjEq({ra}, {dec}, {radius}/60.) as r on p.objid=r.objid and p.primaryDetection = 1""".format(ra, dec, radius)
+  
+    jobs = mastcasjobs.MastCasJobs(context="HLSP_PS1_PSC")
+    tab = jobs.quick(query, task_name="python psc cone search")
 
     return tab
 
