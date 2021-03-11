@@ -24,6 +24,9 @@ def compile_CLU_catalog(filename='CLU_20170106.hdf5', min_dist = CLU_min_dist, m
     CLU_z = f['data']['z']
     CLU_dm = f['data']['dm_kin']
     CLU_SDSS_rMag = f['data']['modelmag_r']
+    CLU_a = f['data']['a']
+    CLU_b2a = f['data']['CLU_ratio_b2a']
+    CLU_pa = f['data']['CLU_pa']
 #    CLU_petro_rMag = f['data']['petromag_r']
 #    CLU_SDSS_rMagErr = f['data']['petromagerr_r']
 #    CLU_petro_rMagErr = f['data']['petromagerr_r']
@@ -41,7 +44,11 @@ def compile_CLU_catalog(filename='CLU_20170106.hdf5', min_dist = CLU_min_dist, m
 #    CLU_SDSS_rMagErr = CLU_SDSS_rMagErr[CLU_filter]
 #    CLU_petro_rMagErr = CLU_petro_rMagErr[CLU_filter]
     CLU_dist = CLU_dist[CLU_filter]
-    d = {'CLU_name':CLU_name,'CLU_ra':CLU_ra,'CLU_dec':CLU_dec,'CLU_dist_Mpc':CLU_dist,'CLU_z':CLU_z,'CLU_SDSS_rMag':CLU_SDSS_rMag}#,'CLU_petro_rMag':CLU_petro_rMag,'CLU_SDSS_rMagErr':CLU_SDSS_rMagErr,'CLU_petro_rMagErr':CLU_petro_rMagErr}
+    CLU_a = CLU_a[CLU_filter]
+    CLU_b2a = CLU_b2a[CLU_filter]
+    CLU_pa = CLU_pa[CLU_filter]
+    d = {'CLU_name': CLU_name, 'CLU_ra': CLU_ra, 'CLU_dec': CLU_dec, 'CLU_dist_Mpc': CLU_dist, 'CLU_z': CLU_z,
+         'CLU_SDSS_rMag': CLU_SDSS_rMag, 'CLU_a': CLU_a, 'CLU_b2a': CLU_b2a, 'CLU_pa': CLU_pa}#,'CLU_petro_rMag':CLU_petro_rMag,'CLU_SDSS_rMagErr':CLU_SDSS_rMagErr,'CLU_petro_rMagErr':CLU_petro_rMagErr}
     CLU_table = pd.DataFrame(d)
     return CLU_table
 
