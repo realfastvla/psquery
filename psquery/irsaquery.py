@@ -1,14 +1,15 @@
 from astroquery import irsa
 from astropy import coordinates, units
+from . import get_radec
 
-
-def cone_wise(ra, dec, radius=5/3600, selectcol=['designation', 'ra', 'dec', 'w1mag', 'w1flg', 'w2mag', 'w2flg',
+def cone_wise(radec, radius=5/3600, selectcol=['designation', 'ra', 'dec', 'w1mag', 'w1flg', 'w2mag', 'w2flg',
                                                  'w3mag', 'w3flg', 'w4mag', 'w4flg']):
     """ cone search from wise cryogenic all-sky survey
     ra, dec in degrees, radius in arcsec.
     Column definitions at https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec2_2a.html
     """
 
+    ra, dec = get_radec(radec)
     co = coordinates.SkyCoord(ra, dec, unit='deg')
     tab = irsa.Irsa.query_region(co, catalog='allsky_4band_p3as_psd')[selectcol]
 

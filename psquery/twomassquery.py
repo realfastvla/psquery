@@ -1,15 +1,14 @@
 import pandas as pd
 from astropy import coordinates, units
 import requests 
+from . import get_radec
 
-
-def query_radec(ra, dec, radius=5/3600, catname='fp_psc'):
+def query_radec(radec, radius=5/3600, catname='fp_psc'):
     """Do a cone search of the 2MASS catalog
     
     Parameters
     ----------
-    ra (float): (degrees) J2000 Right Ascension
-    dec (float): (degrees) J2000 Declination
+    radec can be any format (parsed by get_radec)
     radius (float): (degree) Search radius
     catname: fp_psc (for 2MASS)
     """
@@ -17,6 +16,7 @@ def query_radec(ra, dec, radius=5/3600, catname='fp_psc'):
     radius = str(radius*3600)
     cols = 'ra,dec,designation,ndet'
     outformat = '1'
+    ra, dec = get_radec(radec)
     co = coordinates.SkyCoord(ra, dec, unit=(units.deg, units.deg))
     coord = f'{co.ra.deg}+{co.dec.deg}'
     

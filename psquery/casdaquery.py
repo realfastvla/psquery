@@ -1,12 +1,15 @@
 from astroquery.utils.tap.core import TapPlus
-
-def cone_racs(ra, dec, radius=5., selectcol=['id', 'ra_deg_cont', 'dec_deg_cont', 'ra_err',
+from . import get_radec
+def cone_racs(radec, radius=5., selectcol=['id', 'ra_deg_cont', 'dec_deg_cont', 'ra_err',
                                              'dec_err', 'flux_peak', 'flux_peak_err', 'flux_int',
                                              'flux_int_err', 'maj_axis', 'min_axis']):
     """ cone search of ASKAP/RACS.
-    ra, dec in degrees, radius in arcsec.
+    ra, dec in any format (parsed by get_radec).
+    radius in arcsec.
     """
 
+    ra, dec = get_radec(radec)
+    
 #    base = 'http://casda.csiro.au/casda_vo_tools/tap/sync?request=doQuery&lang=ADQL&format=csv&query='
     casdatap = TapPlus(url="https://casda.csiro.au/casda_vo_tools/tap")
 
