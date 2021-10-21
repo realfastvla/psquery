@@ -79,3 +79,15 @@ def cone_emline(ra, dec, radius=5, selectcol=['specObjID', 'ra', 'dec', 'z', 'zE
     return tab
 
 
+def cone_galaxymass(ra, dec, radius=5, selectcol=[]):
+    """ Query stellarMassStarFormingPort table to get mass, star formation rate and other galaxy properties with BOSS redshifts.
+    Based on Maraston et al (2006).
+    """
+
+    colstr = ', '
+    query = """SELECT TOP 10 G.specobjID, G.ra, G.dec, G.z, G.zErr, G.logMass, G.SFR, G.Metallicity, G.age, N.distance\nFROM stellarMassStarFormingPort as G\nJOIN dbo.fGetNearbySpecObjEq({0}, {1}, {2}) AS N\nON G.specobjID = N.specobjID""".format(ra, dec, radius/60)
+  
+    jobs = mastcasjobs.MastCasJobs(context="SDSSDR14")
+    tab = jobs.quick(query, task_name="python galaxy mass port cone search")
+
+    return tab
