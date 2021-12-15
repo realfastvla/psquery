@@ -8,6 +8,7 @@ def cone_racs(radec, radius=5/3600, selectcol=['id', 'ra_deg_cont', 'dec_deg_con
     """ cone search of ASKAP/RACS.
     ra, dec in any format (parsed by get_radec).
     radius in degrees.
+    selectcol sets columns to return. None or empty list returns all columns.
     """
 
     ra, dec = get_radec(radec)
@@ -19,5 +20,8 @@ def cone_racs(radec, radius=5/3600, selectcol=['id', 'ra_deg_cont', 'dec_deg_con
 
 #    tab = ascii.read(data.decode('utf-8'))
     tab = casdatap.launch_job(query).get_results()
-    
-    return tab[selectcol]
+
+    if selectcol:
+        return tab[selectcol]
+    else:
+        return tab
