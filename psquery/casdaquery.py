@@ -27,7 +27,7 @@ def cone_racs(radec, radius=5/3600, selectcol=['id', 'ra_deg_cont', 'dec_deg_con
         return
         
 #    tab = ascii.read(data.decode('utf-8'))
-    tab = casdatap.launch_job(query).get_results()
+    tab = casdatap.launch_job_async(query).get_results()
 
     if selectcol:
         return tab[selectcol]
