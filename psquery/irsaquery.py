@@ -16,6 +16,21 @@ def cone_wise(radec, radius=5/3600, selectcol=['designation', 'ra', 'dec', 'w1ma
     return tab
 
 
+def cone_pyvo(ra, dec, radius=5, table='allwise_p3as_psd'):
+    """ Query IRSA with pyvo
+    TODO: use unwise? need to figure out which columns
+
+    Default table is allwise.
+    Cone search radius in arcseconds.
+    """
+
+    url = "https://irsa.ipac.caltech.edu/SCS?table=allwise_p3as_psd"
+    co = coordinates.SkyCoord(ra, dec, unit='deg')
+    tab = pyvo.conesearch(url, pos=(co.ra.deg, co.dec.deg), radius = rad/3600).to_table()
+
+    return tab
+
+
 def match_wise(ra, dec):
     """
     for j, (ra, dec, name) in enumerate(tab[['RA (deg)', 'DEC (deg)', 'Short name']]): 
