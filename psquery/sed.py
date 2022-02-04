@@ -136,7 +136,7 @@ def run_fit(phot, hfile='results.h5', emcee=False, plot=True, **params):
         plt.xlim([obs["phot_wave"].min()/1.2, obs["phot_wave"].max()*1.3])
         plt.ylim([np.nanmax(obs["mags"][np.isfinite(obs["mags"])])+3.5, np.nanmin(obs["mags"][ np.isfinite(obs["mags"])])-1])
         plt.xscale('log')
-        plt.annotate(phot['name'], (0.03, 0.94), xycoords='axes fraction', horizontalalignment='left')
+        plt.annotate(run_params['name'], (0.03, 0.94), xycoords='axes fraction', horizontalalignment='left')
 
         plt.legend(loc=4, fontsize=10)
         plt.xscale('log')
