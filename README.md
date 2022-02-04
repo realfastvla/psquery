@@ -12,6 +12,9 @@ See notebook for example execution.
 - urllib
 - requests
 - pandas
+- astroquery
+- pyvo
+- mastcasjobs: `pip install git+https://github.com/rlwastro/mastcasjobs@master`
 
 ## Installation
 
