@@ -10,7 +10,10 @@ from astropy.table import Table
 from astropy import coordinates, units
 import mastcasjobs
 
-def query_radec(ra, dec, ndet=5, radius=5/3600, verbose=False):
+def query_radec(ra, dec, ndet=5, radius=5/3600, columns=['objID', 'raMean', 'decMean', 'gMeanPSFMag', 'gMeanPSFMagErr',
+                                                         'rMeanPSFMag', 'rMeanPSFMagErr', 'iMeanPSFMag', 'iMeanPSFMagErr',
+                                                         'zMeanPSFMag', 'zMeanPSFMagErr', 'yMeanPSFMag', 'yMeanPSFMagErr'],
+                verbose=False, release='dr2'):
     """ cone search in pan-starrs dr2.
     radius is in degrees.
     Returns number of tuple with number of matches, separation in arcsec to nearest, and photometry of nearest.
@@ -23,10 +26,17 @@ def query_radec(ra, dec, ndet=5, radius=5/3600, verbose=False):
     radius = radius
 
     co = coordinates.SkyCoord(ra, dec, unit=(units.deg, units.deg))
-    
-    columnstr = """objID,raMean,decMean,nDetections,ng,nr,ni,nz,ny, gMeanPSFMag,rMeanPSFMag,iMeanPSFMag,zMeanPSFMag,yMeanPSFMag""".split(',')
-    columns = [x.strip() for x in columnstr if x and not x.startswith('#')]
-    results = ps1cone(ra, dec, radius, release='dr2', columns=columns, verbose=verbose, **constraints)
+
+    if isinstance(columns, str):
+        columns = columns.split(",")
+    elif isinstance(columns, list):
+        pass
+    else:
+        print('columns must be list or comma-delimited string')
+#    columns = [x.strip() for x in columnstr if x and not x.startswith('#')]
+#    add "nDetections,ng,nr,ni,nz,ny"?
+
+    results = ps1cone(ra, dec, radius, release=release, columns=columns, verbose=verbose, **constraints)
     lines = results.split('\n')
     if len(lines) == 3:
         if verbose:
@@ -117,7 +127,7 @@ def ps1cone(ra,dec,radius,table="mean",release="dr2",format="csv",columns=None,
                     baseurl=baseurl, verbose=verbose, **data)
 
 
-def ps1search(table="mean",release="dr1",format="csv",columns=None,
+def ps1search(table="mean",release="dr2",format="csv",columns=None,
            baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs", verbose=False,
            **kw):
     """Do a general search of the PS1 catalog (possibly without ra/dec/radius)
@@ -186,7 +196,7 @@ def checklegal(table,release):
         raise ValueError("Bad value for table (for {} must be one of {})".format(release, ", ".join(tablelist)))
 
 
-def ps1metadata(table="mean",release="dr1",
+def ps1metadata(table="mean",release="dr2",
            baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs"):
     """Return metadata for the specified catalog and table
     
