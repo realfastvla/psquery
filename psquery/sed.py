@@ -9,13 +9,90 @@ from prospect.likelihood import lnlike_spec, lnlike_phot, write_log
 from prospect.utils.obsutils import fix_obs
 from psquery import psquery, irsaquery
 
+# new imports
+from astropy.coordinates import SkyCoord
+from astroquery.mast import Catalogs
+from dustmaps.sfd import SFDQuery
+from extinction import fitzpatrick99
+
+lamd = {'ps_g':4866., 'ps_r':6215., 'ps_i':7545., 'ps_z':8679., 'ps_y':9633., 
+       'galex_FUV':1549., 'galex_NUV':2305.,
+       'wise_w1':33680., 'wise_w2':46180., 'wise_w3':120820., 'wise_w1':221940.}
+
+def extinct(ra, dec, phot):
+    """
+    Galactic extinction for given position
+    """
+    sfd = SFDQuery()
+    c = SkyCoord(ra, dec, unit='deg')
+    EBV = sfd(c)
+    new_phot = {}
+    for i in phot:
+        if i in lamd:
+            wav = np.array([lamd[i]])
+            new_phot[i] = phot[i] + sfd(c)*fitzpatrick99(wav, 3.1)[0]
+        else:
+            new_phot[i] = phot[i]
+    return new_phot
 
 def get_phot(ra, dec, radius):
     """
     Photometry should be extinction corrected, AB magnitudes
+    Input ra, dec and search radius
+    Output dictionary with all WISE, PS, and GALEX photometries for the closest source
     """
+    # quering WISE and PS1
+    wise = irsaquery.cone_wise((ra, dec))
+    ps1 = psquery.query_radec(ra, dec)
+    galex = Catalogs.query_object("{0}  {1}".format(ra, dec), radius=radius/3600, catalog="Galex")
+    
+    # cleaning ps1 data
+    ps1 = np.array([float(i) for i in ps1[2][:-1].split(',')])
+    # init phot
+    phot = {}
+    
+    # adding ps1 data
+    if ps1[3] != -999.0 and ps1[4] != -999.0:
+        phot['ps_g'] = ps1[3]
+        phot['ps_g_err'] = ps1[4]
+    if ps1[5] != -999.0 and ps1[6] != -999.0:
+        phot['ps_r'] = ps1[5]
+        phot['ps_r_err'] = ps1[6]
+    if ps1[7] != -999.0 and ps1[8] != -999.0:
+        phot['ps_i'] = ps1[7]
+        phot['ps_i_err'] = ps1[8]
+    if ps1[9] != -999.0 and ps1[10] != -999.0:
+        phot['ps_z'] = ps1[9]
+        phot['ps_z_err'] = ps1[10]
+    if ps1[11] != -999.0 and ps1[12] != -999.0:
+        phot['ps_y'] = ps1[11]
+        phot['ps_y_err'] = ps1[12]
+        
+    # adding WISE data (need to have WISE result and WISE position within ps1 radius)
+    if len(wise) != 0 and wise[0]['dist'] < radius:
+        if type(wise[0]['w1mpro'])==np.float64 and type(wise[0]['w1sigmpro'])==np.float64:
+            phot['wise_w1'] = wise[0]['w1mpro']+2.699
+            phot['wise_w1_err'] = wise[0]['w1sigmpro']
+        if type(wise[0]['w2mpro'])==np.float64 and type(wise[0]['w2sigmpro'])==np.float64:
+            phot['wise_w2'] = wise[0]['w2mpro']+3.399
+            phot['wise_w2_err'] = wise[0]['w2sigmpro']
+        if type(wise[0]['w3mpro'])==np.float64 and type(wise[0]['w3sigmpro'])==np.float64:
+            phot['wise_w3'] = wise[0]['w3mpro']+5.174
+            phot['wise_w3_err'] = wise[0]['w3sigmpro']
+        if type(wise[0]['w4mpro'])==np.float64 and type(wise[0]['w4sigmpro'])==np.float64:
+            phot['wise_w3'] = wise[0]['w3mpro']+6.620
+            phot['wise_w3_err'] = wise[0]['w3sigmpro']
+            
+    if len(galex) != 0 and galex[0]['distance_arcmin']*60 < radius:
+        if type(galex[0]['fuv_mag'])==np.float64 and type(galex[0]['fuv_magerr'])==np.float64:
+            phot['galex_FUV'] = galex[0]['fuv_mag']
+            phot['galex_FUV_err'] = galex[0]['fuv_magerr']
+        if type(galex[0]['nuv_mag'])==np.float64 and type(galex[0]['nuv_magerr'])==np.float64:
+            phot['galex_NUV'] = galex[0]['nuv_mag']
+            phot['galex_NUV_err'] = galex[0]['nuv_magerr']
 
-    pass
+    phot = extinct(ra, dec, phot)
+    return phot
 
 
 ##
