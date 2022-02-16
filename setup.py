@@ -1,9 +1,9 @@
 from setuptools import setup
 
-setup(name='psquery',
+setup(name='psquery-astro',
       version='0.6.0',
       url='http://github.com/realfastvla/psquery',
-      packages=['psquery-astro'],
+      packages=['psquery'],
       author="Casey Law",
       author_email="caseyjlaw@gmail.com",
       install_requies=[

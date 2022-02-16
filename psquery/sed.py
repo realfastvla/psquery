@@ -35,7 +35,7 @@ def extinct(ra, dec, phot):
             new_phot[i] = phot[i]
     return new_phot
 
-def get_phot(ra, dec, radius):
+def get_phot(ra, dec, radius, **kwargs):
     """
     Photometry should be extinction corrected, AB magnitudes
     Input ra, dec and search radius
@@ -48,9 +48,10 @@ def get_phot(ra, dec, radius):
     
     # cleaning ps1 data
     ps1 = np.array([float(i) for i in ps1[2][:-1].split(',')])
-    # init phot
-    phot = {}
-    
+
+    # init phot with kwargs
+    phot = kwargs.copy()
+
     # adding ps1 data
     if ps1[3] != -999.0 and ps1[4] != -999.0:
         phot['ps_g'] = ps1[3]
