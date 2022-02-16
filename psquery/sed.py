@@ -30,7 +30,7 @@ def extinct(ra, dec, phot):
     for i in phot:
         if i in lamd:
             wav = np.array([lamd[i]])
-            new_phot[i] = phot[i] + sfd(c)*fitzpatrick99(wav, 3.1)[0]
+            new_phot[i] = phot[i] - sfd(c)*fitzpatrick99(wav, 3.1)[0]
         else:
             new_phot[i] = phot[i]
     return new_phot
