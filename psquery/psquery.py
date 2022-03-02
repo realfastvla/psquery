@@ -10,9 +10,9 @@ from astropy.table import Table
 from astropy import coordinates, units
 import mastcasjobs
 
-def query_radec(ra, dec, ndet=5, radius=5/3600, columns=['objID', 'raMean', 'decMean', 'gMeanKronMag', 'gMeanKronMagErr',
-                                                         'rMeanKronMag', 'rMeanKronMagErr', 'iMeanKronMag', 'iMeanKronMagErr',
-                                                         'zMeanKronMag', 'zMeanKronMagErr', 'yMeanKronMag', 'yMeanKronMagErr'],
+def query_radec(ra, dec, ndet=5, radius=5/3600, columns=['objID', 'raMean', 'decMean', 'gMeanApMag', 'gMeanApMagErr',
+                                                         'rMeanApMag', 'rMeanApMagErr', 'iMeanApMag', 'iMeanApMagErr',
+                                                         'zMeanApMag', 'zMeanApMagErr', 'yMeanApMag', 'yMeanApMagErr'],
                 verbose=False, release='dr2'):
     """ cone search in pan-starrs dr2.
     radius is in degrees.
