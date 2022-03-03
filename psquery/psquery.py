@@ -10,16 +10,29 @@ from astropy.table import Table
 from astropy import coordinates, units
 import mastcasjobs
 
-def query_radec(ra, dec, ndet=5, radius=5/3600, columns=['objID', 'raMean', 'decMean', 'gMeanKronMag', 'gMeanKronMagErr',
-                                                         'rMeanKronMag', 'rMeanKronMagErr', 'iMeanKronMag', 'iMeanKronMagErr',
-                                                         'zMeanKronMag', 'zMeanKronMagErr', 'yMeanKronMag', 'yMeanKronMagErr'],
-                verbose=False, release='dr2'):
+
+def query_radec(ra, dec, radius=5/3600, ndet=1, columns=None, phot='Kron', table='mean', release='dr2', verbose=False):
     """ cone search in pan-starrs dr2.
     radius is in degrees.
+    table can be 'mean', 'stack', or 'forced_mean'.
+    phot can be 'Kron', 'AP', or 'PSF' (case sensitive).
     Returns number of tuple with number of matches, separation in arcsec to nearest, and photometry of nearest.
     """
 
-    if ndet:
+    if columns is None:
+        columns = ['objID', 'raMean', 'decMean']
+        for band in ['g', 'r', 'i', 'z', 'y']:
+            if table == 'mean':
+                columns.append(f'{band}Mean{phot}Mag')
+                columns.append(f'{band}Mean{phot}MagErr')
+            elif table == 'stack':
+                columns.append(f'{band}{phot}Mag')
+                columns.append(f'{band}{phot}MagErr')
+            elif table == 'forced_mean':
+                columns.append(f'{band}F{phot}Flux')
+                columns.append(f'{band}F{phot}FluxErr')
+        print(f'using columns: {columns}')
+    if ndet and table == 'mean':
         constraints = {'nDetections.gt': ndet}
     else:
         constraints = {}
@@ -36,7 +49,8 @@ def query_radec(ra, dec, ndet=5, radius=5/3600, columns=['objID', 'raMean', 'dec
 #    columns = [x.strip() for x in columnstr if x and not x.startswith('#')]
 #    add "nDetections,ng,nr,ni,nz,ny"?
 
-    results = ps1cone(ra, dec, radius, release=release, columns=columns, verbose=verbose, **constraints)
+    results = ps1cone(ra, dec, radius, release=release, table=table, columns=columns,
+                      verbose=verbose, **constraints)
     lines = results.split('\n')
     if len(lines) == 3:
         if verbose:
@@ -100,7 +114,7 @@ def cone_ps1_psc(ra, dec, radius=5):
     return tab
 
 
-def ps1cone(ra,dec,radius,table="mean",release="dr2",format="csv",columns=None,
+def ps1cone(ra, dec, radius, table="mean", release="dr2", format="csv", columns=None,
            baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs", verbose=False,
            **kw):
     """Do a cone search of the PS1 catalog
