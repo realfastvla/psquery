@@ -84,15 +84,23 @@ def query_radec(ra, dec, radius=5/3600, ndet=1, columns=None, phot='Kron', table
             print('Nothing there.')
         return None
 
-def cone_ps1_casjobs(ra, dec, radius=5, ndet=1, nr=1):
+    
+def cone_ps1_casjobs(ra, dec, radius=5, ndet=1, nr=1, query='MeanObject'):
     """ cone search in ps1 via casjobs (similar to mastquery PS1STRM function)
     ra, dec in degrees, radius in arcsec.
     ndet, nr define number of total and r band detections required.
     Gets primary detection from stacks for rkronRad.
     """
 
-    query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gMeanPSFMag, m.rMeanPSFMag, m.iMeanPSFMag, m.zMeanPSFMag, m.yMeanPSFMag, m.rMeanKronMag, d.rkronRad\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join MeanObject m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(ra, dec, radius, ndet, nr)
-  
+    if 'select' in query:
+        pass
+    elif query == 'ForcedGalaxyShape':
+        query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gGalMag, m.gGalMagErr, m.rGalMag, m.rGalMagErr, m.iGalMag, m.iGalMagErr, m.zGalMag, m.zGalMagErr, m.yGalMag, m.yGalMagErr\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join ForcedGalaxyShape m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(ra, dec, radius, ndet, nr)
+    elif query == 'MeanObject':
+        query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gMeanPSFMag, m.rMeanPSFMag, m.iMeanPSFMag, m.zMeanPSFMag, m.yMeanPSFMag, m.rMeanKronMag, d.rkronRad\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join MeanObject m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(ra, dec, radius, ndet, nr)
+    elif query == 'StackPetrosian':
+        query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gpetMag, m.gpetMagErr, m.rpetMag, m.rpetMagErr, m.ipetMag, m.ipetMagErr, m.zpetMag, m.zpetMagErr, m.ypetMag, m.ypetMagErr\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join StackPetrosian m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(ra, dec, radius, ndet, nr)
+        
     jobs = mastcasjobs.MastCasJobs(context="PanSTARRS_DR2")
     tab = jobs.quick(query, task_name="python ps1 DR2 cone search")
 
