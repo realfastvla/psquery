@@ -15,6 +15,9 @@ def cone_lotss(radec, radius=5/3600, selectcol=['ra', 'dec', 'peak_flux', 'e_pea
     tap = pyvo.dal.TAPService('https://vo.astron.nl/__system__/tap/run/tap')
     query = f"SELECT * FROM lotss_dr2.main_sources where 1=CONTAINS(POINT('ICRS', RA, DEC), CIRCLE('ICRS', {ra}, {dec}, {radius}))"
     tab = tap.search(query).to_table()[selectcol + ['mosaic_id']]
+    if not len(tab):
+        return
+
     dos = []
     for mosaic_id in tab['mosaic_id']:
         query = f"SELECT dateobs FROM lotss_dr2.mosaics where mosaic_id='{mosaic_id}'"
