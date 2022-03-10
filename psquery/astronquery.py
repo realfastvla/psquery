@@ -1,7 +1,7 @@
-from astropy import table
+import numpy as np
+from astropy import table, coordinates, units
 import pyvo
 from . import get_radec
-
 
 def cone_lotss(radec, radius=5/3600, selectcol=['ra', 'dec', 'peak_flux', 'e_peak_flux', 'total_flux'], getepoch=True):
     """ cone search of LoTSS.
@@ -18,11 +18,37 @@ def cone_lotss(radec, radius=5/3600, selectcol=['ra', 'dec', 'peak_flux', 'e_pea
     if not len(tab):
         return
 
+#    co = coordinates.SkyCoord(float(ra), float(dec), unit=(units.deg, units.deg))
+#    col = coordinates.SkyCoord(float(tab['ra']), float(tab['dec']), unit=(units.deg, units.deg))
+#    sep = co.separation(col).to_value(units.arcsec)
+
     dos = []
     for mosaic_id in tab['mosaic_id']:
         query = f"SELECT dateobs FROM lotss_dr2.mosaics where mosaic_id='{mosaic_id}'"
         do = tap.search(query).to_table()['dateobs'][0]
         dos.append(do)
-    tab2 = table.Table(rows=[dos], names=['dateobs'])
+
+    tab2 = table.Table(data=[dos], names=['dateobs'])
 
     return table.hstack([tab, tab2])
+
+def xmatch_lotss(radecs, radius=5/3600):
+    """ Given list of (RA, Dec) tuples, list all LoTSS matches.
+    Prints [RA, Dec, Fp, Fint, sep, epoch]
+    radius in degrees.
+    """
+
+    for ra, dec in radecs:
+        tab = cone_lotss((ra, dec), radius=radius)
+        if tab is not None:
+            if len(tab) == 1:
+                ral, decl, fp, fi, do = tab['ra', 'dec', 'peak_flux', 'total_flux', 'dateobs'][0]
+                co = coordinates.SkyCoord(float(ra), float(dec), unit=(units.deg, units.deg))
+                col = coordinates.SkyCoord(float(ral), float(decl), unit=(units.deg, units.deg))
+                sep = co.separation(col).to_value(units.arcsec)
+                print(ral, decl, fp, fi, sep, do)
+            else:
+                print(f'Found {len(tab)} LoTSS counterparts. Skipping...')
+                continue
+        else:
+            print()
