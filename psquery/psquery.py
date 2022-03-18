@@ -8,16 +8,19 @@ import http.client as httplib
 from astropy.io import ascii 
 from astropy.table import Table 
 from astropy import coordinates, units
-import mastcasjobs
+
+from . import get_coord
 
 
-def query_radec(ra, dec, radius=5/3600, ndet=1, columns=None, phot='Kron', table='mean', release='dr2', verbose=False):
+def query_radec(radec, radius=5/3600, ndet=1, columns=None, phot='Kron', table='mean', release='dr2', verbose=False):
     """ cone search in pan-starrs dr2.
     radius is in degrees.
     table can be 'mean', 'stack', or 'forced_mean'.
     phot can be 'Kron', 'AP', or 'PSF' (case sensitive).
     Returns number of tuple with number of matches, separation in arcsec to nearest, and photometry of nearest.
     """
+
+    ra, dec = get_coord(radec, ret='radec')
 
     if columns is None:
         columns = ['objID', 'raMean', 'decMean']
@@ -85,44 +88,7 @@ def query_radec(ra, dec, radius=5/3600, ndet=1, columns=None, phot='Kron', table
         return None
 
     
-def cone_ps1_casjobs(ra, dec, radius=5, ndet=1, nr=1, query='MeanObject'):
-    """ cone search in ps1 via casjobs (similar to mastquery PS1STRM function)
-    ra, dec in degrees, radius in arcsec.
-    ndet, nr define number of total and r band detections required.
-    Gets primary detection from stacks for rkronRad.
-    """
-
-    if 'select' in query:
-        pass
-    elif query == 'ForcedGalaxyShape':
-        query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gGalMag, m.gGalMagErr, m.rGalMag, m.rGalMagErr, m.iGalMag, m.iGalMagErr, m.zGalMag, m.zGalMagErr, m.yGalMag, m.yGalMagErr\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join ForcedGalaxyShape m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(ra, dec, radius, ndet, nr)
-    elif query == 'MeanObject':
-        query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gMeanPSFMag, m.rMeanPSFMag, m.iMeanPSFMag, m.zMeanPSFMag, m.yMeanPSFMag, m.rMeanKronMag, d.rkronRad\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join MeanObject m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(ra, dec, radius, ndet, nr)
-    elif query == 'StackPetrosian':
-        query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gpetMag, m.gpetMagErr, m.rpetMag, m.rpetMagErr, m.ipetMag, m.ipetMagErr, m.zpetMag, m.zpetMagErr, m.ypetMag, m.ypetMagErr\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}/60.0) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join StackPetrosian m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(ra, dec, radius, ndet, nr)
-        
-    jobs = mastcasjobs.MastCasJobs(context="PanSTARRS_DR2")
-    tab = jobs.quick(query, task_name="python ps1 DR2 cone search")
-
-    return tab
-
-
-def cone_ps1_psc(ra, dec, radius=5):
-    """ cone search in ps1 PSC via casjobs (similar to mastquery PS1STRM function)
-    ra, dec in degrees, radius in arcsec.
-    See Tachibana & Miller (2018; https://iopscience.iop.org/article/10.1088/1538-3873/aae3d9).
-    Optimal extended source has ps_score<0.83.
-    """
-
-    query = f"""select p.objID, p.ps_score, p.raMean, p.decMean\nfrom pointsource_magnitudes_view as p\ninner join fGetNearbyObjEq({ra}, {dec}, {radius}/60.) as r on p.objid=r.objid and p.primaryDetection = 1""".format(ra, dec, radius)
-  
-    jobs = mastcasjobs.MastCasJobs(context="HLSP_PS1_PSC")
-    tab = jobs.quick(query, task_name="python psc cone search")
-
-    return tab
-
-
-def ps1cone(ra, dec, radius, table="mean", release="dr2", format="csv", columns=None,
+def ps1cone(radec, radius, table="mean", release="dr2", format="csv", columns=None,
            baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs", verbose=False,
            **kw):
     """Do a cone search of the PS1 catalog
@@ -140,7 +106,9 @@ def ps1cone(ra, dec, radius, table="mean", release="dr2", format="csv", columns=
     verbose: print info about request
     **kw: other parameters (e.g., 'nDetections.min':2)
     """
-    
+
+    ra, dec = get_coord(radec, ret='radec')
+        
     data = kw.copy()
     data['ra'] = ra
     data['dec'] = dec

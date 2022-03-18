@@ -2,7 +2,7 @@ try:
     from astroquery.utils.tap.core import TapPlus
 except ImportError:
     print('astroquery not available. Cannot use casdaquery.')
-from . import get_radec
+from . import get_coord
 
 
 def cone_racs(radec, radius=5/3600, selectcol=['id', 'ra_deg_cont', 'dec_deg_cont', 'ra_err',
@@ -10,13 +10,13 @@ def cone_racs(radec, radius=5/3600, selectcol=['id', 'ra_deg_cont', 'dec_deg_con
                                                'flux_int_err', 'maj_axis', 'min_axis'],
               catalog='initial'):
     """ cone search of ASKAP/RACS.
-    ra, dec in any format (parsed by get_radec).
+    ra, dec in any format (parsed by get_coord).
     radius in degrees.
     selectcol sets columns to return. None or empty list returns all columns.
     catalog can be 'initial' or 'hale'.
     """
 
-    ra, dec = get_radec(radec)
+    ra, dec = get_coord(radec, ret='radec')
     
 #    base = 'http://casda.csiro.au/casda_vo_tools/tap/sync?request=doQuery&lang=ADQL&format=csv&query='
     casdatap = TapPlus(url="https://casda.csiro.au/casda_vo_tools/tap")

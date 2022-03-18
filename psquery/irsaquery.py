@@ -4,7 +4,7 @@ except ImportError:
     print('astroquery not available. Cannot use irsaquery.')
 
 from astropy import coordinates, units
-from . import get_radec
+from . import get_coord
 
 
 def cone_wise(radec, radius=5/3600, selectcol=['designation', 'ra', 'dec', 'w1mpro', 'w1sigmpro', 'w2mpro',
@@ -15,7 +15,7 @@ def cone_wise(radec, radius=5/3600, selectcol=['designation', 'ra', 'dec', 'w1mp
     https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-dd?catalog=allwise_p3as_psd
     """
 
-    ra, dec = get_radec(radec)
+    ra, dec = get_coord(radec, ret='radec')
     co = coordinates.SkyCoord(ra, dec, unit='deg')
     tab = irsa.Irsa.query_region(co, catalog=catalog, selcols=','.join(selectcol))
 

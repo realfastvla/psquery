@@ -3,7 +3,8 @@ __all__ = ['astronquery', 'casdaquery', 'clutools', 'irsaquery', 'mastquery', 'm
 
 from astropy import coordinates, units
 
-def get_radec(*args):
+
+def get_coord(*args, ret='radec'):
     if len(args) == 2:
         ra0, dec0 = args
 
@@ -32,4 +33,9 @@ def get_radec(*args):
     else:
         print('could not parse args: ', args)
 
-    return co.ra.value, co.dec.value
+    if ret == 'radec':
+        return co.ra.value, co.dec.value
+    elif ret == 'skycoord':
+        return co
+    else:
+        print('ret must be radec or skycoord')

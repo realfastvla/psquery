@@ -1,12 +1,18 @@
-from dl import queryClient as qc
-from dl.helpers.utils import convert
+try:
+    from dl import queryClient as qc
+    from dl.helpers.utils import convert
+except ImportError:
+    print('noaodatalab not imported. cannot query legacysurvey...')
 
+from . import get_coord
 
-def query_legacy(ra, dec, radius = 5):
+def query_legacy(radec, radius = 5):
     """ Query legacy catalog with (ra, dec) in degrees.
     Radius in degrees.
     Returns dataframe.
     """
+
+    ra, dec = get_coord(radec, ret='radec')
 
     query1 = f"""
     SELECT ra,dec,type,ls_id,

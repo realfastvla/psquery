@@ -1,13 +1,16 @@
 import numpy as np
 from matplotlib import pyplot as plt
-import sedpy
-from prospect.fitting import lnprobfn, fit_model
-from prospect.models import priors, sedmodel
-from prospect.models.templates import TemplateLibrary
-from prospect.sources import CSPSpecBasis
-from prospect.likelihood import lnlike_spec, lnlike_phot, write_log
-from prospect.utils.obsutils import fix_obs
-from psquery import psquery, irsaquery
+try:
+    import sedpy
+    from prospect.fitting import lnprobfn, fit_model
+    from prospect.models import priors, sedmodel
+    from prospect.models.templates import TemplateLibrary
+    from prospect.sources import CSPSpecBasis
+    from prospect.likelihood import lnlike_spec, lnlike_phot, write_log
+    from prospect.utils.obsutils import fix_obs
+except ImportError:
+    print('sedpy or prospect not importing. cannot use sed modeling...')
+from . import psquery, irsaquery
 
 # new imports
 from astropy.coordinates import SkyCoord

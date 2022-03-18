@@ -4,17 +4,17 @@ try:
     import pyvo
 except ImportError:
     print('pyvo not available. Cannot use astronquery.')
-from . import get_radec
+from . import get_coord
 
 def cone_lotss(radec, radius=5/3600, selectcol=['ra', 'dec', 'peak_flux', 'e_peak_flux', 'total_flux'], getepoch=True):
     """ cone search of LoTSS.
-    ra, dec in any format (parsed by get_radec).
+    ra, dec (in any format parsed by get_radec).
     radius in degrees.
     selectcol sets columns to return. None or empty list returns all columns.
     catalog can be 'initial' or 'hale'.
     """
 
-    ra, dec = get_radec(radec)
+    ra, dec = get_coord(radec, ret='radec')
     tap = pyvo.dal.TAPService('https://vo.astron.nl/__system__/tap/run/tap')
     query = f"SELECT * FROM lotss_dr2.main_sources where 1=CONTAINS(POINT('ICRS', RA, DEC), CIRCLE('ICRS', {ra}, {dec}, {radius}))"
     tab = tap.search(query).to_table()[selectcol + ['mosaic_id']]
