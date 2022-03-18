@@ -1,4 +1,7 @@
-from astroquery.utils.tap.core import TapPlus
+try:
+    from astroquery.utils.tap.core import TapPlus
+except ImportError:
+    print('astroquery not available. Cannot use casdaquery.')
 from . import get_radec
 
 

@@ -1,4 +1,8 @@
-import mastcasjobs
+try:
+    import mastcasjobs
+except ImportError:
+    print('mastcasjobs not available. Cannot use mastquery.')
+
 from astropy.io import ascii
 from astropy.table import Table
 from astropy import coordinates, units

@@ -8,11 +8,13 @@ setup(name='psquery-astro',
       author_email="caseyjlaw@gmail.com",
       install_requies=[
           'astropy',
+          'astroquery',
+          'pandas',
           'extinction',
           'sedpy',
           'dustmaps',
           'mastcasjobs',
-          'astroquery',
-          'pyvo'
+          'pyvo',
+          'noaodatalab'
       ],
       zip_safe=False)

@@ -1,5 +1,8 @@
 from astropy import coordinates, units
-from astroquery import vizier
+try:
+    from astroquery import vizier
+except ImportError:
+    print('astroquery not available. Cannot use mwaquery.')
 from . import get_radec
 
 vz = vizier.Vizier()

@@ -1,4 +1,5 @@
-__all__ = ['psquery', 'irsaquery', 'mastquery', 'clutools', 'mwaquery', 'casdaquery', 'twomassquery', 'get_radec']
+__all__ = ['astronquery', 'casdaquery', 'clutools', 'irsaquery', 'mastquery', 'mwaquery', 'psquery', 
+           'sed', 'twomassquery', 'vlssr', 'noaoquery', 'get_radec']
 
 from astropy import coordinates, units
 
