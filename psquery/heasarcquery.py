@@ -5,15 +5,16 @@ from . import get_coord
 
 heq = heasarc.Heasarc()
 
+
 def query_vlssr(radec, radius):
-    """ 
+    """
     radec is parsed by get_coord
     returns dataframe
     """
 
-    coord = get_coord(radec, ret='skycoord')
+    coord = get_coord(radec, ret="skycoord")
     try:
-        tab = heq.query_region(coord, mission='vlssr', radius=0.5*units.deg)
+        tab = heq.query_region(coord, mission="vlssr", radius=0.5 * units.deg)
     except TypeError:
         print("No sources found")
         tab = None
@@ -22,15 +23,15 @@ def query_vlssr(radec, radius):
 
 
 def query_first(radec, radius):
-    """ 
+    """
     radec is parsed by get_coord
     returns dataframe
     """
 
-    coord = get_coord(radec, ret='skycoord')
+    coord = get_coord(radec, ret="skycoord")
 
     try:
-        tab = heq.query_region(source, mission='first', radius=0.5*units.deg)
+        tab = heq.query_region(source, mission="first", radius=0.5 * units.deg)
     except TypeError:
         print("No sources found")
         tab = None
