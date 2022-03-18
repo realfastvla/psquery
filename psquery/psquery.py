@@ -1,13 +1,12 @@
-import numpy as np
-
-import requests 
-from urllib.parse import quote as urlencode 
-from urllib.request import urlretrieve 
 import http.client as httplib
-     
-from astropy.io import ascii 
-from astropy.table import Table 
+from urllib.parse import quote as urlencode
+from urllib.request import urlretrieve
+
+import numpy as np
+import requests
 from astropy import coordinates, units
+from astropy.io import ascii
+from astropy.table import Table
 
 from . import get_coord
 

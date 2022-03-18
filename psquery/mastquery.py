@@ -3,17 +3,18 @@ try:
 except ImportError:
     print('mastcasjobs not available. Cannot use mastquery.')
 
-from astropy.io import ascii
-from astropy.table import Table
-from astropy import coordinates, units
-import numpy as np
+# get the WSID and password if not already defined
+import getpass
 import os
 import re
 
+import numpy as np
+from astropy import coordinates, units
+from astropy.io import ascii
+from astropy.table import Table
+
 from . import get_coord
 
-# get the WSID and password if not already defined
-import getpass
 if not os.environ.get('CASJOBS_WSID'):
     os.environ['CASJOBS_WSID'] = input('Enter Casjobs WSID:')
 if not os.environ.get('CASJOBS_PW'):

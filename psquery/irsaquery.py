@@ -4,6 +4,7 @@ except ImportError:
     print('astroquery not available. Cannot use irsaquery.')
 
 from astropy import coordinates, units
+
 from . import get_coord
 
 

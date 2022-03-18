@@ -6,6 +6,7 @@ except ImportError:
 
 from . import get_coord
 
+
 def query_legacy(radec, radius = 5):
     """ Query legacy catalog with (ra, dec) in degrees.
     Radius in degrees.

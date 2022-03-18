@@ -1,7 +1,9 @@
 import pandas as pd
+import requests
 from astropy import coordinates, units
-import requests 
+
 from . import get_coord
+
 
 def query_radec(radec, radius=5/3600, catname='fp_psc'):
     """Do a cone search of the 2MASS catalog

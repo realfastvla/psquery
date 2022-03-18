@@ -1,10 +1,12 @@
 import numpy as np
-from astropy import table, coordinates, units
+from astropy import coordinates, table, units
+
 try:
     import pyvo
 except ImportError:
     print('pyvo not available. Cannot use astronquery.')
 from . import get_coord
+
 
 def cone_lotss(radec, radius=5/3600, selectcol=['ra', 'dec', 'peak_flux', 'e_peak_flux', 'total_flux'], getepoch=True):
     """ cone search of LoTSS.

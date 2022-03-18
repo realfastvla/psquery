@@ -1,8 +1,8 @@
+import h5py
 import numpy as np
 import pandas as pd
-import h5py
-from astropy import units as u
 from astropy import coordinates
+from astropy import units as u
 
 CLU_min_dist = 0*u.Mpc #change to 5 or something similar to exclude nearby resolved galaxies
 CLU_max_dist = 200.0*u.Mpc

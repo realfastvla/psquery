@@ -1,22 +1,23 @@
 import numpy as np
 from matplotlib import pyplot as plt
+
 try:
     import sedpy
-    from prospect.fitting import lnprobfn, fit_model
+    from prospect.fitting import fit_model, lnprobfn
+    from prospect.likelihood import lnlike_phot, lnlike_spec, write_log
     from prospect.models import priors, sedmodel
     from prospect.models.templates import TemplateLibrary
     from prospect.sources import CSPSpecBasis
-    from prospect.likelihood import lnlike_spec, lnlike_phot, write_log
     from prospect.utils.obsutils import fix_obs
 except ImportError:
     print('sedpy or prospect not importing. cannot use sed modeling...')
-from . import psquery, irsaquery
-
 # new imports
 from astropy.coordinates import SkyCoord
 from astroquery.mast import Catalogs
 from dustmaps.sfd import SFDQuery
 from extinction import fitzpatrick99
+
+from . import irsaquery, psquery
 
 lamd = {'ps_g':4866., 'ps_r':6215., 'ps_i':7545., 'ps_z':8679., 'ps_y':9633., 
        'galex_FUV':1549., 'galex_NUV':2305.,
@@ -224,8 +225,8 @@ def run_fit(phot, hfile='results.h5', emcee=False, plot=True, **params):
         plt.show()
 
     if emcee:
-        from prospect.io import write_results as writer
         import prospect.io.read_results as reader
+        from prospect.io import write_results as writer
 
         # Run emcee
         run_params["optimize"] = False

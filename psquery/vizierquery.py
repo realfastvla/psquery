@@ -1,4 +1,5 @@
 from astropy import coordinates, units
+
 try:
     from astroquery import vizier
 except ImportError:

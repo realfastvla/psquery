@@ -1,5 +1,6 @@
-from astroquery import heasarc
 from astropy import coordinates, units
+from astroquery import heasarc
+
 from . import get_coord
 
 heq = heasarc.Heasarc()
