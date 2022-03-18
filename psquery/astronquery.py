@@ -69,3 +69,39 @@ def xmatch_lotss(radecs, radius=5 / 3600):
                 continue
         else:
             print()
+
+
+def cone_tgss(
+    radec,
+    radius=5 / 3600,
+    selectcol=["RA", "DEC", "Spk", "e_Spk", "Sint", "e_Sint"],
+):
+    """cone search of TGSS
+    ra, dec (in any format parsed by get_radec).
+    radius in degrees.
+    selectcol sets columns to return. None or empty list returns all columns.
+    """
+
+    ra, dec = get_coord(radec, ret="radec")
+    tap = pyvo.dal.TAPService("https://vo.astron.nl/__system__/tap/run/tap")
+    query = f"SELECT * FROM tgssadr.main where 1=CONTAINS(POINT('ICRS', RA, DEC), CIRCLE('ICRS', {ra}, {dec}, {radius}))"
+    tab = tap.search(query).to_table()[selectcol]
+
+    if not len(tab):
+        return
+
+    #    co = coordinates.SkyCoord(float(ra), float(dec), unit=(units.deg, units.deg))
+    #    col = coordinates.SkyCoord(float(tab['ra']), float(tab['dec']), unit=(units.deg, units.deg))
+    #    sep = co.separation(col).to_value(units.arcsec)
+
+    dos = []
+    for ra, dec in tab["RA", "DEC"]:
+        query = f"SELECT dateObs FROM tgssadr.img_main where 1=CONTAINS(POINT('ICRS', centerAlpha, centerDelta), CIRCLE('ICRS', {ra}, {dec}, {radius}))"
+        do = tap.search(query).to_table()["dateObs"][0]
+        dos.append(do)
+
+    tab2 = table.Table(data=[dos], names=["dateObs"])
+
+    return table.hstack([tab, tab2])
+
+

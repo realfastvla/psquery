@@ -10,7 +10,7 @@ __all__ = [
     "twomassquery",
     "vlssr",
     "noaoquery",
-    "get_radec",
+    "get_coord",
 ]
 
 from astropy import coordinates, units
