@@ -1,6 +1,6 @@
 import pytest
 from astropy import coordinates
-from psquery import get_coord, astronquery, casdaquery, heasarcquery, irsaquery, mastquery, noaoquery, psquery, vizierquery
+from psquery import get_coord, astronquery, casdaquery, heasarcquery, irsaquery, mastquery, noaoquery, psquery, vizierquery, radio_survey_data
 
 radecn = '13:31:08.288,30:30:32.9'
 #'19:58:17.74, +34:34:38.7'
@@ -24,6 +24,8 @@ def test_lotss():
     if tab is not None:
         print(len(tab))
 
+def test_data():
+    assert len(radio_survey_data())
 def test_tgss():
     tab = astronquery.cone_tgss(radecs, radius*10)
     if tab is not None:

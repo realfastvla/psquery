@@ -11,7 +11,7 @@ from astropy.table import Table
 from . import get_coord
 
 
-def query_radec(
+def cone_ps1(
     radec,
     radius=5 / 3600,
     ndet=1,
@@ -60,7 +60,7 @@ def query_radec(
     #    columns = [x.strip() for x in columnstr if x and not x.startswith('#')]
     #    add "nDetections,ng,nr,ni,nz,ny"?
 
-    results = ps1cone(
+    results = _ps1cone(
         ra,
         dec,
         radius,
@@ -105,8 +105,9 @@ def query_radec(
             print("Nothing there.")
         return None
 
+query_radec = cone_ps1
 
-def ps1cone(ra, dec,
+def _ps1cone(ra, dec,
     radius,
     table="mean",
     release="dr2",
@@ -136,7 +137,7 @@ def ps1cone(ra, dec,
     data["ra"] = ra
     data["dec"] = dec
     data["radius"] = radius
-    return ps1search(
+    return _ps1search(
         table=table,
         release=release,
         format=format,
@@ -147,7 +148,7 @@ def ps1cone(ra, dec,
     )
 
 
-def ps1search(
+def _ps1search(
     table="mean",
     release="dr2",
     format="csv",
@@ -172,7 +173,7 @@ def ps1search(
     data = kw.copy()
     if not data:
         raise ValueError("You must specify some parameters for search")
-    checklegal(table, release)
+    _checklegal(table, release)
     if format not in ("csv", "votable", "json"):
         raise ValueError("Bad value for format")
     url = "{baseurl}/{release}/{table}.{format}".format(**locals())
@@ -180,7 +181,7 @@ def ps1search(
         # check that column values are legal
         # create a dictionary to speed this up
         dcols = {}
-        for col in ps1metadata(table, release)["name"]:
+        for col in _ps1metadata(table, release)["name"]:
             dcols[col.lower()] = 1
         badcols = []
         for col in columns:
@@ -207,7 +208,7 @@ def ps1search(
         return r.text
 
 
-def checklegal(table, release):
+def _checklegal(table, release):
     """Checks if this combination of table and release is acceptable
 
     Raises a VelueError exception if there is problem
@@ -230,7 +231,7 @@ def checklegal(table, release):
         )
 
 
-def ps1metadata(
+def _ps1metadata(
     table="mean",
     release="dr2",
     baseurl="https://catalogs.mast.stsci.edu/api/v0.1/panstarrs",
@@ -246,7 +247,7 @@ def ps1metadata(
     Returns an astropy table with columns name, type, description
     """
 
-    checklegal(table, release)
+    _checklegal(table, release)
     url = "{baseurl}/{release}/{table}/metadata".format(**locals())
     r = requests.get(url)
     r.raise_for_status()

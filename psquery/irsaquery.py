@@ -40,7 +40,7 @@ def cone_wise(
     return tab
 
 
-def cone_pyvo(ra, dec, radius=5, table="allwise_p3as_psd"):
+def cone_wise_pyvo(ra, dec, radius=5, table="allwise_p3as_psd"):
     """Query IRSA with pyvo
     TODO: use unwise? need to figure out which columns
 

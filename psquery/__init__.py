@@ -10,9 +10,10 @@ __all__ = [
     "sed",
     "vizierquery",
     "get_coord",
+    "radio_survey_data",
 ]
 
-from astropy import coordinates, units
+from astropy import coordinates, units, io
 
 def get_coord(*args, ret="radec"):
     if len(args) == 2:
@@ -55,28 +56,30 @@ def get_coord(*args, ret="radec"):
         print("ret must be radec or skycoord")
 
 
-def radio_survey_plot():
+def radio_survey_data():
     """ Compile and visualize radio surveys in time, freq.
     """
 
-    # survey, freq, area, start, stop
-    # first, 1.4, 10000, 1994, 2005
-    # nvss, 1.4, 33885, 1993, 1998
-    # wenss, 0.325, ?, 1997
-    # vlass, 3.0, 33885, 2017, 2022
-    # vcss, 0.34, 33885, 2017?, 2022
-    # tgss, 0.15, 37100, 2010, 2012
-    # racs, 0.887, 34240, 2019, 2022?
-    # lotss, 0.15, 5600, , 2022?
-    # sumss (max dec=-30)
-    pass
+    return io.ascii.read('''
+    name, freq, area, start, stop, notes
+    sumss , , , , , south of -30 so not much overlap with others
+    first, 1.4, 10000, 1994, 2005, north/south galactic caps
+    nvss, 1.4, 33885, 1993, 1998, north of -30
+    wenss, 0.325, ?, 1991, 1997, north of +30
+    tgss, 0.15, 37100, 2010, 2012, north of -53
+    gleam, 0.15, 33885, 2013, 2015, south of +30
+    vlass, 3.0, 33885, 2017, 2022, north of -30 (ongoing)
+    vcss, 0.34, 33885, 2017, 2022, north of -30 (ongoing. start may be wrong)
+    racs, 0.887, 34240, 2019, 2022, south of +30 (ongoing)
+    lotss, 0.15, 5600, 2014, 2020, subset of north of 0
+    ''')
 
 from psquery.astronquery import cone_lotss, cone_tgss
 from psquery.casdaquery import cone_racs
 from psquery.heasarcquery import cone_first, cone_nvss, cone_wenss, cone_vlssr
-from psquery.irsaquery import cone_wise, cone_twomass # cone_pyvo should be renamed
+from psquery.irsaquery import cone_wise, cone_twomass
 from psquery.mastquery import cone_ps1strm, cone_ps1psc, cone_emline, cone_galaxymass
 from psquery.noaoquery import cone_legacy
-#from psquery.psquery import cone_ps1 # need to rename still
+from psquery.psquery import cone_ps1
 from psquery.vizierquery import cone_gleam
 

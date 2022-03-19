@@ -1,7 +1,7 @@
 try:
     from dl import queryClient as qc
     from dl.helpers.utils import convert
-except ImportError:
+except (ImportError, OSError):
     print("noaodatalab not imported. cannot query legacysurvey...")
 
 from . import get_coord
