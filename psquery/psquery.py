@@ -106,8 +106,7 @@ def query_radec(
         return None
 
 
-def ps1cone(
-    radec,
+def ps1cone(ra, dec,
     radius,
     table="mean",
     release="dr2",
@@ -132,8 +131,6 @@ def ps1cone(
     verbose: print info about request
     **kw: other parameters (e.g., 'nDetections.min':2)
     """
-
-    ra, dec = get_coord(radec, ret="radec")
 
     data = kw.copy()
     data["ra"] = ra

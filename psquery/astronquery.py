@@ -74,7 +74,7 @@ def xmatch_lotss(radecs, radius=5 / 3600):
 def cone_tgss(
     radec,
     radius=5 / 3600,
-    selectcol=["RA", "DEC", "Spk", "e_Spk", "Sint", "e_Sint"],
+    selectcol=["ra", "dec", "spk", "e_spk", "sint", "e_sint"],
 ):
     """cone search of TGSS
     ra, dec (in any format parsed by get_radec).
