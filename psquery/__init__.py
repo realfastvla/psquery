@@ -2,15 +2,17 @@ __all__ = [
     "astronquery",
     "casdaquery",
     "clutools",
+    "heasarcquery",
     "irsaquery",
     "mastquery",
+    "noaoquery",
     "psquery",
     "sed",
-    "vlssr",
-    "noaoquery",
+    "vizierquery",
     "get_coord",
 ]
 
+from 
 from astropy import coordinates, units
 
 
