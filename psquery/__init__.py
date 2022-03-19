@@ -12,7 +12,6 @@ __all__ = [
     "get_coord",
 ]
 
-from 
 from astropy import coordinates, units
 
 
