@@ -5,7 +5,7 @@ from astropy import coordinates, units
 from . import get_coord
 
 
-def query_radec(radec, radius=5 / 3600, catname="fp_psc"):
+def cone_twomass(radec, radius=5 / 3600, catname="fp_psc"):
     """Do a cone search of the 2MASS catalog
 
     Parameters

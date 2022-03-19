@@ -6,7 +6,6 @@ __all__ = [
     "mastquery",
     "psquery",
     "sed",
-    "twomassquery",
     "vlssr",
     "noaoquery",
     "get_coord",
