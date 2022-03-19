@@ -7,7 +7,7 @@ except ImportError:
 from . import get_coord
 
 
-def query_legacy(radec, radius=5/3600):
+def cone_legacy(radec, radius=5/3600):
     """Query legacy catalog with (ra, dec) in degrees.
     Radius in degrees.
     Returns dataframe.

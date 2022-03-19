@@ -6,7 +6,7 @@ from . import get_coord
 heq = heasarc.Heasarc()
 
 
-def query_vlssr(radec, radius):
+def cone_vlssr(radec, radius):
     """
     radec is parsed by get_coord
     radius in degrees.
@@ -23,7 +23,7 @@ def query_vlssr(radec, radius):
     return tab.to_pandas()
 
 
-def query_first(radec, radius):
+def cone_first(radec, radius):
     """
     radec is parsed by get_coord
     radius in degrees
@@ -41,7 +41,7 @@ def query_first(radec, radius):
     return tab.to_pandas()
 
 
-def query_nvss(radec, radius):
+def cone_nvss(radec, radius):
     """
     radec is parsed by get_coord
     radius in degrees
@@ -59,7 +59,7 @@ def query_nvss(radec, radius):
     return tab.to_pandas()
 
 
-def query_wenss(radec, radius):
+def cone_wenss(radec, radius):
     """
     radec is parsed by get_coord
     radius in degrees
