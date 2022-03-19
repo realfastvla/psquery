@@ -4,7 +4,6 @@ __all__ = [
     "clutools",
     "irsaquery",
     "mastquery",
-    "mwaquery",
     "psquery",
     "sed",
     "twomassquery",

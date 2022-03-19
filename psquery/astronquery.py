@@ -73,7 +73,7 @@ def xmatch_lotss(radecs, radius=5 / 3600):
 
 def cone_tgss(
     radec,
-    radius=5 / 3600,
+    radius=5/3600,
     selectcol=["ra", "dec", "spk", "e_spk", "sint", "e_sint"],
 ):
     """cone search of TGSS
@@ -94,14 +94,14 @@ def cone_tgss(
     #    col = coordinates.SkyCoord(float(tab['ra']), float(tab['dec']), unit=(units.deg, units.deg))
     #    sep = co.separation(col).to_value(units.arcsec)
 
-    dos = []
-    for ra, dec in tab["RA", "DEC"]:
-        query = f"SELECT dateObs FROM tgssadr.img_main where 1=CONTAINS(POINT('ICRS', centerAlpha, centerDelta), CIRCLE('ICRS', {ra}, {dec}, {radius}))"
-        do = tap.search(query).to_table()["dateObs"][0]
-        dos.append(do)
+#    dos = []
+#    for ra, dec in tab["ra", "dec"]:
+#        query = f"SELECT dateObs FROM tgssadr.img_main where 1=CONTAINS(POINT('ICRS', centerAlpha, centerDelta), CIRCLE('ICRS', {ra}, {dec}, {radius}))"
+#        do = tap.search(query).to_table()["dateObs"][0]
+#        dos.append(do)
+#
+#    tab2 = table.Table(data=[dos], names=["dateObs"])
+#    return table.hstack([tab, tab2])
 
-    tab2 = table.Table(data=[dos], names=["dateObs"])
-
-    return table.hstack([tab, tab2])
-
+    return tab
 
