@@ -26,7 +26,10 @@ def cone_lotss(
     query = f"SELECT * FROM lotss_dr2.main_sources where 1=CONTAINS(POINT('ICRS', RA, DEC), CIRCLE('ICRS', {ra}, {dec}, {radius}))"
     tab = tap.search(query).to_table()[selectcol + ["mosaic_id"]]
     if not len(tab):
-        return
+        if False:   # need to get function to find coverage
+            return -0.8 # 90% completeness in mJy
+        else:
+            return
 
     #    co = coordinates.SkyCoord(float(ra), float(dec), unit=(units.deg, units.deg))
     #    col = coordinates.SkyCoord(float(tab['ra']), float(tab['dec']), unit=(units.deg, units.deg))
@@ -88,7 +91,10 @@ def cone_tgss(
     tab = tap.search(query).to_table()[selectcol]
 
     if not len(tab):
-        return
+        if dec > -53:
+            return -5*3.5 # 5 sigma in mJy
+        else:
+            return
 
     #    co = coordinates.SkyCoord(float(ra), float(dec), unit=(units.deg, units.deg))
     #    col = coordinates.SkyCoord(float(tab['ra']), float(tab['dec']), unit=(units.deg, units.deg))

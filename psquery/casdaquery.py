@@ -46,7 +46,13 @@ def cone_racs(
     #    tab = ascii.read(data.decode('utf-8'))
     tab = casdatap.launch_job_async(query).get_results()
 
-    if selectcol:
-        return tab[selectcol]
+    if len(tab):
+        if selectcol:
+            return tab[selectcol]
+        else:
+            return tab
     else:
-        return tab
+        if dec < 30 and dec > -80:
+            return -5*0.25 # 5 sigma limit in mjy
+        else:
+            return None
