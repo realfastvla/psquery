@@ -182,7 +182,7 @@ def cone_ps1_casjobs(radec, radius=5/3600, ndet=1, nr=1, query="MeanObject"):
     return tab
 
 
-def cone_ps1_psc(radec, radius=5/3600):
+def cone_ps1psc(radec, radius=5/3600):
     """cone search in ps1 PSC via casjobs (similar to mastquery PS1STRM function)
     ra, dec in degrees, radius in degres.
     See Tachibana & Miller (2018; https://iopscience.iop.org/article/10.1088/1538-3873/aae3d9).

@@ -14,7 +14,6 @@ __all__ = [
 
 from astropy import coordinates, units
 
-
 def get_coord(*args, ret="radec"):
     if len(args) == 2:
         ra0, dec0 = args
@@ -54,3 +53,13 @@ def get_coord(*args, ret="radec"):
         return co
     else:
         print("ret must be radec or skycoord")
+
+from psquery.astronquery import cone_lotss, cone_tgss
+from psquery.casdaquery import cone_racs
+from psquery.heasarcquery import cone_first, cone_nvss, cone_wenss, cone_vlssr
+from psquery.irsaquery import cone_wise, cone_twomass # cone_pyvo should be renamed
+from psquery.mastquery import cone_ps1strm, cone_ps1psc, cone_emline, cone_galaxymass
+from psquery.noaoquery import cone_legacy
+#from psquery.psquery import cone_ps1 # need to rename still
+from psquery.vizier import cone_gleam
+
