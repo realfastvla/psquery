@@ -64,12 +64,12 @@ def radio_survey_data():
     name, freq, area, start, stop, notes
     sumss , , , , , south of -30 so not much overlap with others
     first, 1.4, 10000, 1994, 2005, north/south galactic caps
-    nvss, 1.4, 33885, 1993, 1998, north of -30
+    nvss, 1.4, 33885, 1993, 1998, north of -40
     wenss, 0.325, ?, 1991, 1997, north of +30
     tgss, 0.15, 37100, 2010, 2012, north of -53
     gleam, 0.15, 33885, 2013, 2015, south of +30
-    vlass, 3.0, 33885, 2017, 2022, north of -30 (ongoing)
-    vcss, 0.34, 33885, 2017, 2022, north of -30 (ongoing. start may be wrong)
+    vlass, 3.0, 33885, 2017, 2022, north of -40 (ongoing)
+    vcss, 0.34, 33885, 2017, 2022, north of -40 (ongoing. start may be wrong)
     racs, 0.887, 34240, 2019, 2022, south of +30 (ongoing)
     lotss, 0.15, 5600, 2014, 2020, subset of north of 0
     ''')
