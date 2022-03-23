@@ -63,9 +63,10 @@ def radio_survey_data():
     return io.ascii.read('''
     name, freq, area, start, stop, notes
     sumss , , , , , south of -30 so not much overlap with others
-    first, 1.4, 10000, 1994, 2005, north/south galactic caps
+    gb6, 5.0, 20000, 1986, 1987, 0<dec<75
+    wenss, 0.325, 10300, 1991, 1997, north of +30
     nvss, 1.4, 33885, 1993, 1998, north of -40
-    wenss, 0.325, ?, 1991, 1997, north of +30
+    first, 1.4, 10000, 1994, 2005, north/south galactic caps
     tgss, 0.15, 37100, 2010, 2012, north of -53
     gleam, 0.15, 33885, 2013, 2015, south of +30
     vlass, 3.0, 33885, 2017, 2022, north of -40 (ongoing)

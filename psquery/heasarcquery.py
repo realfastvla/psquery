@@ -88,3 +88,24 @@ def cone_wenss(radec, radius):
             tab = None
 
     return tab
+
+
+def cone_gb6(radec, radius):
+    """
+    radec is parsed by get_coord
+    radius in degrees
+    returns dataframe
+    """
+
+    coord = get_coord(radec, ret="skycoord")
+
+    try:
+        tab = heq.query_region(coord, mission="gb6", radius=radius*units.deg)
+    except TypeError:
+        print("No sources found")
+        if coord.dec.value > +0 and coord.dec.value < 75:
+            tab = -18 # source detection limit in mJy
+        else:
+            tab = None
+
+    return tab

@@ -7,6 +7,7 @@ radecn = '13:31:08.288,30:30:32.9'
 radecn1 = '13:29:52.7, 47:11:43'
 radecs = '00:22:25.425930, 00:14:56.161440'
           #(221.2578, -13.9480)
+radecsfar = (0, -80)
 radius = 5/3600
 
 
@@ -21,15 +22,10 @@ def test_coord2():
 
 def test_lotss():
     tab = astronquery.cone_lotss(radecn, radius)
-    if tab is not None:
-        print(len(tab))
+    assert len(tab)
 
 def test_data():
     assert len(radio_survey_data())
-def test_tgss():
-    tab = astronquery.cone_tgss(radecs, radius*10)
-    if tab is not None:
-        print(len(tab))
 
 def test_racs():
     tab = casdaquery.cone_racs(radecs, radius)
@@ -38,24 +34,42 @@ def test_racs():
     
 def test_vlssr():
     tab = heasarcquery.cone_vlssr(radecn1, radius)
-    if tab is not None:
-        print(len(tab))
+    print(len(tab))
+    assert len(tab)
     
 def test_first():
     tab = heasarcquery.cone_first(radecn, radius)
-    if tab is not None:
-        print(len(tab))
-    
+    print(len(tab))
+    assert len(tab)
+
+def test_gb6():
+    tab = heasarcquery.cone_gb6(radecn, radius)
+    print(len(tab))
+    assert len(tab)
+
 def test_nvss():
     tab = heasarcquery.cone_nvss(radecn, radius)
-    if tab is not None:
-        print(len(tab))
-    
+    print(len(tab))
+    assert len(tab)
+
 def test_wenss():
     tab = heasarcquery.cone_wenss(radecn, radius)
-    if tab is not None:
-        print(len(tab))
+    print(len(tab))
+    assert len(tab)
+
+def test_tgss():
+    tab = astronquery.cone_tgss(radecs, radius*10)
+    print(len(tab))
     
+def test_small():
+    tab = astronquery.cone_tgss(radecn, 1e-6)  # find nothing in survey region, return limit
+    assert isinstance(tab, float), 'no tgss source in survey region should return -limit'
+    assert tab < 0, 'no tgss source in survey region should return -limit'
+
+def test_outside():
+    tab = astronquery.cone_tgss(radecsfar, 1/3600)  # find nothing outside limit, return None
+    assert tab is None, 'query outside tgss region should find nothing'
+
 def test_wise():
     pass
 #psquery/irsaquery.py:def cone_wise(
@@ -63,8 +77,8 @@ def test_wise():
 
 def test_ps1strm():
     tab = mastquery.cone_ps1strm(radecn, radius)
-    if tab is not None:
-        print(len(tab))
+    print(len(tab))
+    assert len(tab)
 
 # others
 #psquery/mastquery.py:def match_ps1strm(radec, radius, verbose=False):
@@ -75,13 +89,13 @@ def test_ps1strm():
 
 def test_legacy():
     tab = noaoquery.cone_legacy(radecs, radius)
-    if tab is not None:
-        print(len(tab))
+    print(len(tab))
+    assert len(tab)
 
 def test_ps1():
     tab = psquery.query_radec(radecn, radius)
-    if tab is not None:
-        print(len(tab))
+    print(len(tab))
+    assert len(tab)
 
 def test_sed():
     pass
@@ -91,11 +105,11 @@ def test_sed():
 
 def test_twomass():
     tab = irsaquery.cone_twomass(radecn, radius, catname="fp_psc")
-    if tab is not None:
-        print(len(tab))
+    print(len(tab))
+    assert len(tab)
     
 def test_gleam():
     tab = vizierquery.cone_gleam(radecs, radius)
-    if tab is not None:
-        print(len(tab))
+    print(len(tab))
+    assert len(tab)
 
