@@ -478,7 +478,7 @@ def build_obs(
     phot=None,
     filternames=None,
     mag_err_clip=0.05,
-    standard=["galex", "ps", "sdss", "wise"],
+    standard=["galex", "ps", "sdss", "wise", "decam"],
     **extras
 ):
     """Build a dictionary of observational data.
@@ -567,8 +567,8 @@ def build_model(
 
     # Get (a copy of) one of the prepackaged model set dictionaries.
     # This is a dictionary of dictionaries, keyed by parameter name
-    model_params = TemplateLibrary["ssp"]
-    #    model_params = TemplateLibrary["parametric_sfh"]
+#    model_params = TemplateLibrary["ssp"]
+    model_params = TemplateLibrary["parametric_sfh"]
     model_params["sfh"]["init"] = 1  # this is 4 in template
     model_params["tburst"] = {
         "N": 1,
