@@ -1,6 +1,6 @@
 import pytest
 from astropy import coordinates
-from psquery import get_coord, astronquery, casdaquery, heasarcquery, irsaquery, mastquery, noaoquery, psquery, vizierquery, radio_survey_data
+from psquery import get_coord, astronquery, casdaquery, heasarcquery, irsaquery, mastquery, noaoquery, psquery, vizierquery, radio_survey_data, chimequery
 
 radecn = '13:31:08.288,30:30:32.9'
 #'19:58:17.74, +34:34:38.7'
@@ -113,3 +113,7 @@ def test_gleam():
     print(len(tab))
     assert len(tab)
 
+def test_chime():
+    df = chimequery.cone_catalog1(radecn, radius=10)
+    print(len(df))
+    assert len(df)
