@@ -161,7 +161,7 @@ def cone_ps1_casjobs(radec, radius=5/3600, ndet=1, nr=1, query="MeanObject"):
 
     ra, dec = get_coord(radec, ret="radec")
 
-    if "select" in query:
+    if "select" in query.lower():
         pass
     elif query == "ForcedGalaxyShape":
         query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gGalMag, m.gGalMagErr, m.rGalMag, m.rGalMagErr, m.iGalMag, m.iGalMagErr, m.zGalMag, m.zGalMagErr, m.yGalMag, m.yGalMagErr\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join ForcedGalaxyShape m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(
@@ -175,6 +175,9 @@ def cone_ps1_casjobs(radec, radius=5/3600, ndet=1, nr=1, query="MeanObject"):
         query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gpetMag, m.gpetMagErr, m.rpetMag, m.rpetMagErr, m.ipetMag, m.ipetMagErr, m.zpetMag, m.zpetMagErr, m.ypetMag, m.ypetMagErr\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join StackPetrosian m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(
             ra, dec, radius*60, ndet, nr
         )
+    else:
+        print(f'query ({query}) is not one of known options.')
+        return
 
     jobs = mastcasjobs.MastCasJobs(context="PanSTARRS_DR2")
     tab = jobs.quick(query, task_name="python ps1 DR2 cone search")
