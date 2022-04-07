@@ -16,10 +16,11 @@ from astropy.table import Table
 from . import get_coord
 
 if not os.environ.get("CASJOBS_WSID"):
-    os.environ["CASJOBS_WSID"] = input("Enter Casjobs WSID:")
+    print("need to set env CASJOBS_WSID")
+#    os.environ["CASJOBS_WSID"] = input("Enter Casjobs WSID:")
 if not os.environ.get("CASJOBS_PW"):
-    os.environ["CASJOBS_PW"] = getpass.getpass("Enter Casjobs password:")
-
+    print("need to set env CASJOBS_PW")
+#    os.environ["CASJOBS_PW"] = getpass.getpass("Enter Casjobs password:")
 
 def cone_ps1strm(
     radec,
