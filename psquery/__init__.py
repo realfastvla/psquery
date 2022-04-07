@@ -4,13 +4,15 @@ __all__ = [
     "clutools",
     "heasarcquery",
     "irsaquery",
-    "mastquery",
-    "noaoquery",
     "psquery",
     "sed",
     "vizierquery",
     "get_coord",
     "radio_survey_data",
+# these are noisy
+    "mastquery",
+    "noaoquery",
+    "chimequery"
 ]
 
 from astropy import coordinates, units, io

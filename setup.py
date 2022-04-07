@@ -15,6 +15,7 @@ setup(name='psquery-astro',
           'dustmaps',
           'mastcasjobs',
           'pyvo',
-          'noaodatalab'
+          'noaodatalab',
+          'cfod'
       ],
       zip_safe=False)

@@ -6,7 +6,12 @@ try:
     from cfod import catalog
     data = catalog.as_dataframe()
 except ImportError:
-    print("cfod not available. Cannot use chimequery.")
+    try:
+        data = pd.read_csv("/home/ubuntu/chimefrbcat1.csv")
+        print("read cfod catalog from disk")
+    except:
+        pass
+    print("cfod catalog not available. Cannot use chimequery.")
 
 from . import get_coord
 
