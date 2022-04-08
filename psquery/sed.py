@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import os.path
 
 try:
     import sedpy
@@ -305,7 +306,7 @@ def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
 
         # Run emcee
         run_params["optimize"] = False
-        run_params["emcee"] = False
+        run_params["emcee"] = True
         run_params["nwalkers"] = 100  # Number of emcee walkers
         run_params["niter"] = 1000  # Number of iterations of the MCMC sampling
         run_params["nburn"] = [100]
@@ -315,6 +316,11 @@ def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
         output = fit_model(obs, model, sps, lnprobfn=lnprobfn, **run_params)  # ,
         print("Done emcee in {0:0.1f}s".format(output["sampling"][1]))
 
+        if os.path.exists(hfile):
+            resp = input(f"Output file ({hfile}) already exists. New file name? Enter name of 'n' to not change.")
+            if resp.lower() != 'n':
+                hfile = resp
+                print(f"Setting output file name to {hfile}.")
         writer.write_hdf5(hfile, run_params, model, obs, output["sampling"][0])
 
         # grab results (dictionary), the obs dictionary, and our corresponding models
