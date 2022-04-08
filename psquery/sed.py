@@ -31,7 +31,10 @@ lamd = {
     "wise_w1": 33680.0,
     "wise_w2": 46180.0,
     "wise_w3": 120820.0,
-    "wise_w1": 221940.0,
+    "wise_w4": 221940.0,
+    'decam_g':4770,
+    'decam_r':6371.3,
+    'decam_z':9157.9
 }
 
 
@@ -52,41 +55,93 @@ def extinct(ra, dec, phot):
     return new_phot
 
 
-def get_phot(ra, dec, radius, **kwargs):
+def get_phot(radec, radius, legacy=False, galaxy=False, **kwargs):
     """
     Photometry should be extinction corrected, AB magnitudes
     Input ra, dec and search radius
     Output dictionary with all WISE, PS, and GALEX photometries for the closest source
     """
     # quering WISE and PS1
-    wise = irsaquery.cone_wise((ra, dec))
-    ps1 = psquery.query_radec(ra, dec)
+    wise = irsaquery.cone_wise(radec)
+    if galaxy:
+        ps1 = mastquery.cone_ps1_casjobs(radec, query='ForcedGalaxyShape')
+        try:
+            ps1 = ps1[0]
+        except IndexError:
+            print('No galaxy shape data')
+            
+    else:
+        ps1 = psquery.query_radec(radec, table='stack', phot='Kron')
+        ps1 = np.array([float(i) for i in ps1[2][:-1].split(",")])
+    
     galex = Catalogs.query_object(
-        "{0}  {1}".format(ra, dec), radius=radius / 3600, catalog="Galex"
+        "{0}  {1}".format(radec[0], radec[1]), radius=radius/3600, catalog="Galex"
     )
-
-    # cleaning ps1 data
-    ps1 = np.array([float(i) for i in ps1[2][:-1].split(",")])
+    try:
+        noao = noaoquery.cone_legacy(radec, radius=1/3600)
+    except:
+        noao = []
+        print('no noao')
 
     # init phot with kwargs
     phot = kwargs.copy()
 
-    # adding ps1 data
-    if ps1[3] != -999.0 and ps1[4] != -999.0:
-        phot["ps_g"] = ps1[3]
-        phot["ps_g_err"] = ps1[4]
-    if ps1[5] != -999.0 and ps1[6] != -999.0:
-        phot["ps_r"] = ps1[5]
-        phot["ps_r_err"] = ps1[6]
-    if ps1[7] != -999.0 and ps1[8] != -999.0:
-        phot["ps_i"] = ps1[7]
-        phot["ps_i_err"] = ps1[8]
-    if ps1[9] != -999.0 and ps1[10] != -999.0:
-        phot["ps_z"] = ps1[9]
-        phot["ps_z_err"] = ps1[10]
-    if ps1[11] != -999.0 and ps1[12] != -999.0:
-        phot["ps_y"] = ps1[11]
-        phot["ps_y_err"] = ps1[12]
+    if len(galex) != 0 and galex[0]["distance_arcmin"] * 60 < radius:
+        if (
+            type(galex[0]["fuv_mag"]) == np.float64
+            and type(galex[0]["fuv_magerr"]) == np.float64
+        ):
+            phot["galex_FUV"] = galex[0]["fuv_mag"]
+            phot["galex_FUV_err"] = galex[0]["fuv_magerr"]
+        if (
+            type(galex[0]["nuv_mag"]) == np.float64
+            and type(galex[0]["nuv_magerr"]) == np.float64
+        ):
+            phot["galex_NUV"] = galex[0]["nuv_mag"]
+            phot["galex_NUV_err"] = galex[0]["nuv_magerr"]
+    
+    if legacy and len(noao)!=0:
+        noao = noao.iloc[0]
+        phot['decam_g'] = noao.mag_g
+        phot['decam_g_err'] = noao.mag_g_err
+        phot['decam_r'] = noao.mag_r
+        phot['decam_r_err'] = noao.mag_r_err
+        phot['decam_z'] = noao.mag_z
+        phot['decam_z_err'] = noao.mag_z_err
+    elif galaxy:
+        if ps1['gGalMag'] != -999.0 and ps1['gGalMagErr'] != -999.0:
+            phot["ps_g"] = ps1['gGalMag']
+            phot["ps_g_err"] = ps1['gGalMagErr']
+        if ps1['rGalMag'] != -999.0 and ps1['rGalMagErr'] != -999.0:
+            phot["ps_r"] = ps1['rGalMag']
+            phot["ps_r_err"] = ps1['rGalMagErr']
+        if ps1['iGalMag'] != -999.0 and ps1['iGalMagErr'] != -999.0:
+            phot["ps_i"] = ps1['iGalMag']
+            phot["ps_i_err"] = ps1['iGalMagErr']
+        if ps1['zGalMag'] != -999.0 and ps1['zGalMagErr'] != -999.0:
+            phot["ps_z"] = ps1['zGalMag']
+            phot["ps_z_err"] = ps1['zGalMagErr']
+        if ps1['yGalMag'] != -999.0 and ps1['yGalMagErr'] != -999.0:
+            phot["ps_y"] = ps1['yGalMag']
+            phot["ps_y_err"] = ps1['yGalMagErr']
+    else:
+        # adding ps1 data
+        if ps1[3] != -999.0 and ps1[4] != -999.0:
+            phot["ps_g"] = ps1[3]
+            phot["ps_g_err"] = ps1[4]
+        if ps1[5] != -999.0 and ps1[6] != -999.0:
+            phot["ps_r"] = ps1[5]
+            phot["ps_r_err"] = ps1[6]
+        if ps1[7] != -999.0 and ps1[8] != -999.0:
+            phot["ps_i"] = ps1[7]
+            phot["ps_i_err"] = ps1[8]
+        if ps1[9] != -999.0 and ps1[10] != -999.0:
+            phot["ps_z"] = ps1[9]
+            phot["ps_z_err"] = ps1[10]
+        if ps1[11] != -999.0 and ps1[12] != -999.0:
+            phot["ps_y"] = ps1[11]
+            phot["ps_y_err"] = ps1[12]
+
 
     # adding WISE data (need to have WISE result and WISE position within ps1 radius)
     if len(wise) != 0 and wise[0]["dist"] < radius:
@@ -102,34 +157,20 @@ def get_phot(ra, dec, radius, **kwargs):
         ):
             phot["wise_w2"] = wise[0]["w2mpro"] + 3.399
             phot["wise_w2_err"] = wise[0]["w2sigmpro"]
-        if (
-            type(wise[0]["w3mpro"]) == np.float64
-            and type(wise[0]["w3sigmpro"]) == np.float64
-        ):
-            phot["wise_w3"] = wise[0]["w3mpro"] + 5.174
-            phot["wise_w3_err"] = wise[0]["w3sigmpro"]
-        if (
-            type(wise[0]["w4mpro"]) == np.float64
-            and type(wise[0]["w4sigmpro"]) == np.float64
-        ):
-            phot["wise_w3"] = wise[0]["w3mpro"] + 6.620
-            phot["wise_w3_err"] = wise[0]["w3sigmpro"]
+        #if (
+        #    type(wise[0]["w3mpro"]) == np.float64
+        #    and type(wise[0]["w3sigmpro"]) == np.float64
+        #):
+        #    phot["wise_w3"] = wise[0]["w3mpro"] + 5.174
+        #    phot["wise_w3_err"] = wise[0]["w3sigmpro"]
+        #if (
+        #    type(wise[0]["w4mpro"]) == np.float64
+        #    and type(wise[0]["w4sigmpro"]) == np.float64
+        #):
+        #    phot["wise_w3"] = wise[0]["w3mpro"] + 6.620
+        #    phot["wise_w3_err"] = wise[0]["w3sigmpro"]
 
-    if len(galex) != 0 and galex[0]["distance_arcmin"] * 60 < radius:
-        if (
-            type(galex[0]["fuv_mag"]) == np.float64
-            and type(galex[0]["fuv_magerr"]) == np.float64
-        ):
-            phot["galex_FUV"] = galex[0]["fuv_mag"]
-            phot["galex_FUV_err"] = galex[0]["fuv_magerr"]
-        if (
-            type(galex[0]["nuv_mag"]) == np.float64
-            and type(galex[0]["nuv_magerr"]) == np.float64
-        ):
-            phot["galex_NUV"] = galex[0]["nuv_mag"]
-            phot["galex_NUV_err"] = galex[0]["nuv_magerr"]
-
-    phot = extinct(ra, dec, phot)
+    phot = extinct(radec, phot)
     return phot
 
 
@@ -482,7 +523,9 @@ def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
         )
         plt.show()
 
-    return pspec, pphot, pfrac
+    #return pspec, pphot, pfrac
+    return (wspec * (1 + zplot), mi2mg(pspec)), (obs['phot_wave'], obs['mags'], mi2mg(pphot)), theta_best
+
 
 
 def build_obs(
@@ -595,8 +638,8 @@ def build_model(
     # Some initial values, should be adjusted probably
     model_params["dust2"]["init"] = 0.05
     model_params["logzsol"]["init"] = -0.63
-    model_params["tage"]["init"] = 8.67
-    model_params["mass"]["init"] = 10 ** (10.15)
+    model_params["tage"]["init"] = 4.67
+    model_params["mass"]["init"] = 10 ** (9)
     model_params["tage"]["prior"] = priors.TopHat(mini=0.1, maxi=12.5)
     model_params["dust2"]["prior"] = priors.TopHat(mini=0.0, maxi=1)
     model_params["mass"]["prior"] = priors.LogUniform(mini=2e8, maxi=1e12)
