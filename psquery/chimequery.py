@@ -10,8 +10,7 @@ except ImportError:
         data = pd.read_csv("/home/ubuntu/chimefrbcat1.csv")
         print("read cfod catalog from disk")
     except:
-        pass
-    print("cfod catalog not available. Cannot use chimequery.")
+        print("cfod catalog not available. Cannot use chimequery.")
 
 from . import get_coord
 
