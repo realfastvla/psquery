@@ -304,14 +304,15 @@ def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
         import prospect.io.read_results as reader
         from prospect.io import write_results as writer
 
+        runit = False
         if os.path.exists(hfile):
             resp = input(f"Output file ({hfile}) already exists. \n 'y' to load those results or enter new file name.")
             if resp.lower() != 'y':
                 hfile = resp
                 print(f"Setting output file name to {hfile}.")
                 runit = True
-            else:
-                runit = False
+        else:
+            runit = True
 
         run_params["optimize"] = False
         run_params["emcee"] = True
