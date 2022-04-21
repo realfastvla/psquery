@@ -18,7 +18,7 @@ from astroquery.mast import Catalogs
 from dustmaps.sfd import SFDQuery
 from extinction import fitzpatrick99
 
-from . import irsaquery, psquery
+from . import irsaquery, psquery, noaoquery
 
 lamd = {
     "ps_g": 4866.0,
@@ -38,12 +38,12 @@ lamd = {
 }
 
 
-def extinct(ra, dec, phot):
+def extinct(radec, phot):
     """
     Galactic extinction for given position
     """
     sfd = SFDQuery()
-    c = SkyCoord(ra, dec, unit="deg")
+    c = SkyCoord(radec[0], radec[1], unit="deg")
     EBV = sfd(c)
     new_phot = {}
     for i in phot:
@@ -81,7 +81,7 @@ def get_phot(radec, radius, legacy=False, galaxy=False, **kwargs):
         noao = noaoquery.cone_legacy(radec, radius=1/3600)
     except:
         noao = []
-        print('no noao')
+        print('NO NOAO cannot using panstarrs...')
 
     # init phot with kwargs
     phot = kwargs.copy()
@@ -368,7 +368,10 @@ def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
             output = fit_model(obs, model, sps, lnprobfn=lnprobfn, **run_params)  # ,
             print("Done emcee in {0:0.1f}s".format(output["sampling"][1]))
 
-            writer.write_hdf5(hfile, run_params, model, obs, output["sampling"][0])
+            writer.write_hdf5(hfile, run_params, model, obs,
+                  output["sampling"][0], output["optimization"][0],
+                  tsample=output["sampling"][1],
+                  toptimize=output["optimization"][1])
 
         # grab results (dictionary), the obs dictionary, and our corresponding models
         # When using parameter files set `dangerous=True`
@@ -523,6 +526,7 @@ def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
             fig=plt.subplots(len(theta), len(theta), figsize=(10, 10))[0],
         )
         plt.show()
+        return (wspec * (1 + zplot), mi2mg(mspec_medpos)), (obs['phot_wave'], obs['mags']), 
 
     #return pspec, pphot, pfrac
     return (wspec * (1 + zplot), mi2mg(pspec)), (obs['phot_wave'], obs['mags'], mi2mg(pphot)), theta_best
@@ -691,3 +695,286 @@ def build_model(
 
 def mi2mg(maggies):
     return -2.5 * np.log10(maggies)
+
+def read_h5(hfile, plot=True):
+    # grab results (dictionary), the obs dictionary, and our corresponding models
+    # When using parameter files set `dangerous=True`
+    result, obs, model = reader.results_from(hfile, dangerous=False)
+    run_params = result['run_params']
+    model = (sed.build_model(**run_params),)[0]
+    
+    sps = CSPSpecBasis(zcontinuous=1,dust_type=2, imf_type=1, 
+                       add_neb_emission=run_params["add_dust_emission"],
+                       compute_vega_mags=False,
+    )
+    phot = run_params["phot"]
+    
+    # get the mean spectrum
+    theta_medpos = np.median(result["chain"][:, -1, :], axis=0)
+    mspec_medpos, mphot_medpos, _ = model.mean_model(theta_medpos, obs, sps=sps)
+
+    # collect MCMC results
+    specphot_obs = []
+
+    cred_int = 68.1
+    fit_info = {}
+    fit_info["medpos"] = {}  # median of posterior (default?)
+    fit_info["maxp"] = {}  # max of likelihood
+    fit_info[
+        "weightp"
+    ] = {}  # median of samples from poserior wegithed by likelihood
+
+    theta_fit = {}
+    theta_fit["medpos"] = np.zeros(
+        len(result["theta_labels"])
+    )  # to store the median of the posterior
+    theta_fit["maxp"] = np.zeros(
+        len(result["theta_labels"])
+    )  # to store the max likelihood estimate
+    theta_fit["weightp"] = np.zeros(
+        len(result["theta_labels"])
+    )  # to store the weighted mean
+
+    # run FSPS to get best-fit model and surviving mass
+    theta = model.theta.copy()
+    _, _, _ = model.mean_model(theta, obs, sps=sps)
+    sps_pickled = sps.ssp
+
+    # loop again to get uncertainties
+    for i, lbl in enumerate(result["theta_labels"]):
+
+        ipostburn = int(-run_params["niter"] / 2)
+        th_sample = result["chain"][:, ipostburn:, i].flatten()
+        lnp = result["lnprobability"][:, ipostburn:].flatten()
+
+        for ft in theta_fit:
+
+            if lbl == "mass":
+                tt = np.log10(th_sample * sps_pickled.stellar_mass)
+            else:
+                tt = th_sample
+
+            if ft == "weightp":
+                w = np.exp(lnp) * th_sample
+            else:
+                w = th_sample
+
+            if ft == "maxp":
+                center = tt[np.argmax(lnp)]
+            else:
+                center = np.sort(tt)[np.argmin(np.abs(w.cumsum() - w.sum() / 2))]
+
+            theta_fit[ft][i] = center
+            islo = np.argmin(
+                np.abs(w.cumsum() - w.sum() * (0.5 - cred_int / 100 / 2.0))
+            )
+            isup = np.argmin(
+                np.abs(w.cumsum() - w.sum() * (0.5 + cred_int / 100 / 2.0))
+            )
+            fit_info[ft][lbl] = (
+                center,
+                np.clip(np.abs(center - np.sort(tt)[islo]), 0, 999),
+                np.clip(np.abs(center - np.sort(tt)[isup]), 0, 999),
+            )
+
+    mphot_dict = {
+        k: np.zeros(result["run_params"]["nwalkers"]) for k in obs["filternames"]
+    }
+
+    # loop over final state of all walkers to sample some spectra
+    for i in range(result["run_params"]["nwalkers"]):
+        theta = result["chain"][i, -1, :]
+        mspec, mphot, _ = model.mean_model(theta, obs, sps=sps)
+        specphot_obs.append((mspec, mphot))
+
+        for l, k in enumerate(obs["filternames"]):
+            mphot_dict[k][i] = mi2mg(mphot[l])
+          
+    if "zred" in fit_info["medpos"].keys():
+        zplot = fit_info["medpos"]["zred"][0]
+    else:
+        zplot = phot["z"]
+    
+    wspec = sps.wavelengths
+    
+    if plot:
+        # dict with latex labels for the plot legend
+        theta_lbl_latex = {}
+        downup = "${0[0]:0.1f}_{{{0[1]:0.1f}}}^{{{0[2]:0.1f}}}$"
+        theta_lbl_latex["mass"] = r"log($M/M_\odot$)=" + downup
+        theta_lbl_latex["zred"] = r"z=" + downup
+        theta_lbl_latex["logzsol"] = r"$log(Z/Z_\odot$)=" + downup
+        theta_lbl_latex["dust2"] = r"E(B-V)=" + downup
+        theta_lbl_latex["tau"] = r"$\tau$=" + downup + " Gyr"
+        theta_lbl_latex["tage"] = r"$t$=" + downup + " Gyr"
+        theta_lbl_latex["fburst"] = r"$M_{{young}}/M$=" + downup
+        theta_lbl_latex["fage_burst"] = r"$t_{{young}}/t$=" + downup
+        theta_lbl_latex["fagn"] = r"$f_{{AGN}}$=" + downup
+        
+        # plot some models
+        colormap = plt.cm.viridis
+
+        for i in range(result["run_params"]["nwalkers"]):
+            mspec, mphot = specphot_obs[i]
+            plt.plot(
+                sps_pickled.wavelengths * (1 + zplot),
+                mi2mg(mspec),
+                lw=0.7,
+                color=colormap(0.2),
+                alpha=0.1,
+                zorder=1,
+            )
+            plt.plot(
+                obs["phot_wave"],
+                mi2mg(mphot),
+                label="",
+                marker="o",
+                alpha=0.1,
+                ls="",
+                lw=1,
+                zorder=2,
+                markersize=5,
+                markerfacecolor="none",
+                markeredgecolor=colormap(0.5),
+                markeredgewidth=0.7,
+            )
+            
+        plt.plot(
+            obs["phot_wave"],
+            obs['mags'],
+            label="Observations",
+            marker="o",
+            alpha=1,
+            ls="",
+            lw=1,
+            zorder=2,
+            markersize=5,
+            markerfacecolor=colormap(0.8),
+            markeredgecolor=colormap(0.8),
+            markeredgewidth=0.7,
+        )
+
+        nice_label = ""
+        for k in model.free_params:
+            nice_label += theta_lbl_latex[k].format(fit_info["medpos"][k]) + "  "
+            if k == "dust2":
+                nice_label += "\n"
+
+        plt.plot(
+            wspec * (1 + zplot),
+            mi2mg(mspec_medpos) * 0,
+            label=nice_label,
+            lw=0.7,
+            color=colormap(0.2),
+            alpha=0.9,
+        )
+        plt.plot(
+            wspec * (1 + zplot), mi2mg(mspec_medpos), lw=0.7, color="red", alpha=0.9
+        )
+
+        plt.legend(loc=4, fontsize=10, framealpha=0.7, facecolor="white")
+
+        plt.xlim(obs["phot_wave"].min() / 1.1, obs["phot_wave"].max() * 1.2)
+        plt.ylim(
+            [
+                np.nanmax(obs["mags"][np.isfinite(obs["mags"])]) + 3.5,
+                np.nanmin(obs["mags"][np.isfinite(obs["mags"])]) - 1,
+            ]
+        )
+        plt.xscale("log")
+        plt.show()
+
+        cornerfig = reader.subcorner(
+            result,
+            start=0,
+            thin=5,
+            fig=plt.subplots(len(theta), len(theta), figsize=(10, 10))[0],
+        )
+        plt.show()
+    
+    return (wspec * (1 + zplot), mi2mg(mspec_medpos)), (obs['phot_wave'], obs['mags'], mi2mg(mphot)), fit_info['medpos']
+
+
+
+
+
+def run_fit2(phot, hfile="results.h5", emcee=True, **params):
+    """Just runs MCMC and saves a file
+        NO ANALYSIS
+    """
+
+    # set default run_params, then overload
+    run_params = {
+        "object_redshift": phot["z"],
+        "free_redshift": phot["free_redshift"],
+        "zcontinuous": 1,
+    }
+    run_params["phot"] = phot
+    if "name" in phot:
+        run_params["name"] = str(phot["name"]).replace("_", "")
+    else:
+        run_params["name"] = ""
+    run_params["model_template"] = "parasfh"  # default
+    run_params["add_dust_emission"] = False  # include dust emission and fit WISE
+    run_params["add_AGN_dust"] = False  # add AGN dust?
+    run_params["fixed_metallicity"] = None  # fix metals?
+    run_params["no_dust"] = False  # fix dust to zero
+    run_params["verbose"] = True
+    run_params["output_pickles"] = False
+    run_params["dynesty"] = False
+    run_params["optimize"] = True
+    run_params["min_method"] = "lm"
+    run_params["nmin"] = 10  # number of draws to start from
+    for kk, vv in params:
+        run_params[kk] = vv
+    run_params["emcee"] = emcee
+
+    # set it up
+    obs = (build_obs(**run_params),)
+    model = (build_model(**run_params),)
+    sps = CSPSpecBasis(
+        zcontinuous=1,
+        dust_type=2,
+        imf_type=1,
+        add_neb_emission=run_params["add_dust_emission"],
+        compute_vega_mags=False,
+    )
+
+    # not clear why these are tuples, but they should be dicts
+    if isinstance(obs, tuple):
+        obs = obs[0]
+    if isinstance(model, tuple):
+        model = model[0]
+
+    if emcee:
+        import prospect.io.read_results as reader
+        from prospect.io import write_results as writer
+
+        runit = False
+        if os.path.exists(hfile):
+            resp = input(f"Output file ({hfile}) already exists. \n 'y' to load those results or enter new file name.")
+            if resp.lower() != 'y':
+                hfile = resp
+                print(f"Setting output file name to {hfile}.")
+                runit = True
+        else:
+            runit = True
+
+        run_params["optimize"] = False
+        run_params["emcee"] = True
+        run_params["nwalkers"] = 100  # Number of emcee walkers
+        run_params["niter"] = 1000  # Number of iterations of the MCMC sampling
+        run_params["nburn"] = [100]
+        run_params["progress"] = False
+
+        if runit:
+            # Run emcee
+            print("Starting MCMC")
+            output = fit_model(obs, model, sps, lnprobfn=lnprobfn, **run_params)  # ,
+            print("Done emcee in {0:0.1f}s".format(output["sampling"][1]))
+            
+            hfile = "prospector_results/" + hfile
+            writer.write_hdf5(hfile, run_params, model, obs,
+                  output["sampling"][0], output["optimization"][0],
+                  tsample=output["sampling"][1],
+                  toptimize=output["optimization"][1])
