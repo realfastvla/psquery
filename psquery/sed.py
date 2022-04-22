@@ -170,7 +170,7 @@ def get_phot(radec, radius, legacy=False, galaxy=False, **kwargs):
         #    phot["wise_w3"] = wise[0]["w3mpro"] + 6.620
         #    phot["wise_w3_err"] = wise[0]["w3sigmpro"]
 
-    phot = extinct(radec, phot)
+    phot = extinct(radec=radec, phot=phot)
     return phot
 
 
@@ -699,9 +699,11 @@ def mi2mg(maggies):
 def read_h5(hfile, plot=True):
     # grab results (dictionary), the obs dictionary, and our corresponding models
     # When using parameter files set `dangerous=True`
+    import prospect.io.read_results as reader
+
     result, obs, model = reader.results_from(hfile, dangerous=False)
     run_params = result['run_params']
-    model = (sed.build_model(**run_params),)[0]
+    model = (build_model(**run_params),)[0]
     
     sps = CSPSpecBasis(zcontinuous=1,dust_type=2, imf_type=1, 
                        add_neb_emission=run_params["add_dust_emission"],
@@ -973,7 +975,6 @@ def run_fit2(phot, hfile="results.h5", emcee=True, **params):
             output = fit_model(obs, model, sps, lnprobfn=lnprobfn, **run_params)  # ,
             print("Done emcee in {0:0.1f}s".format(output["sampling"][1]))
             
-            hfile = "prospector_results/" + hfile
             writer.write_hdf5(hfile, run_params, model, obs,
                   output["sampling"][0], output["optimization"][0],
                   tsample=output["sampling"][1],
