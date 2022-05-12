@@ -1,6 +1,7 @@
 __all__ = [
     "astronquery",
     "casdaquery",
+    "catquery",
     "clutools",
     "heasarcquery",
     "irsaquery",
