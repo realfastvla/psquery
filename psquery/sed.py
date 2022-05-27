@@ -647,15 +647,15 @@ def build_model(
     model_params["mass"]["init"] = 10 ** (9)
     model_params["tage"]["prior"] = priors.TopHat(mini=0.1, maxi=12.5)
     model_params["dust2"]["prior"] = priors.TopHat(mini=0.0, maxi=1)
-    model_params["mass"]["prior"] = priors.LogUniform(mini=2e8, maxi=1e12)
+    model_params["mass"]["prior"] = priors.LogUniform(mini=1e7, maxi=1e12)
 
     if "tau" in model_params:
         model_params["tau"]["prior"] = priors.LogUniform(mini=0.1, maxi=1)
 
     # If we are going to be using emcee, it is useful to provide a
     # minimum scale for the cloud of walkers (the default is 0.1)
-    model_params["mass"]["init_disp"] = 1e8
-    model_params["mass"]["disp_floor"] = 1e8
+    model_params["mass"]["init_disp"] = 1e7
+    model_params["mass"]["disp_floor"] = 1e7
     model_params["tage"]["init_disp"] = 3
     model_params["tage"]["disp_floor"] = 2
     model_params["logzsol"]["init_disp"] = 1
