@@ -6,7 +6,7 @@ setup(name='psquery-astro',
       packages=['psquery'],
       author="Casey Law",
       author_email="caseyjlaw@gmail.com",
-      install_requies=[
+      install_requires=[
           'astropy',
           'astroquery',
           'pandas',
