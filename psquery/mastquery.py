@@ -176,6 +176,10 @@ def cone_ps1_casjobs(radec, radius=5/3600, ndet=1, nr=1, query="MeanObject"):
         query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, m.gpetMag, m.gpetMagErr, m.rpetMag, m.rpetMagErr, m.ipetMag, m.ipetMagErr, m.zpetMag, m.zpetMagErr, m.ypetMag, m.ypetMagErr\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join StackPetrosian m on o.objid = m.objid\ninner join StackObjectAttributes d on o.objid = d.objid and d.primaryDetection = 1""".format(
             ra, dec, radius*60, ndet, nr
         )
+    elif query == "StackModel":
+        query = f"""select o.objID, o.raMean, o.decMean, o.nDetections, o.ng, o.nr, o.ni, o.nz, o.ny, s.rhalfLightRad\nfrom fGetNearbyObjEq({ra}, {dec}, {radius}) nb\ninner join ObjectThin o on o.objid = nb.objid and nDetections>{ndet} and nr>{nr}\ninner join StackModelFitExtra s on o.objid=s.objid and s.primaryDetection = 1""".format(
+            ra, dec, radius*60, ndet, nr
+        )
     else:
         print(f'query ({query}) is not one of known options.')
         return
