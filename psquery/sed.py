@@ -182,6 +182,11 @@ def get_phot(radec, radius, legacy=False, galaxy=False, **kwargs):
 def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
     """Wrap the obs/model/sps generation and run for given photometry dict."""
 
+    if "z" not in phot:
+        phot["z"] = 0
+    if "free_redshift" not in phot:
+        phot["free_redshift"] = True
+
     # set default run_params, then overload
     run_params = {
         "object_redshift": phot["z"],
@@ -654,7 +659,7 @@ def build_model(
 
     # If we are going to be using emcee, it is useful to provide a
     # minimum scale for the cloud of walkers (the default is 0.1)
-    model_params["mass"]["init_disp"] = 1e7
+    model_params["mass"]["init_disp"] = 1e8
     model_params["mass"]["disp_floor"] = 1e7
     model_params["tage"]["init_disp"] = 3
     model_params["tage"]["disp_floor"] = 2
