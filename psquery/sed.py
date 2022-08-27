@@ -14,11 +14,14 @@ except ImportError:
     print("sedpy or prospect not importing. cannot use sed modeling...")
 # new imports
 from astropy.coordinates import SkyCoord
+from astropy import cosmology
 from astroquery.mast import Catalogs
 from dustmaps.sfd import SFDQuery
 from extinction import fitzpatrick99
 
 from . import irsaquery, psquery, noaoquery
+
+cosmo = cosmology.Planck18
 
 lamd = {
     "ps_g": 4866.0,
@@ -186,6 +189,7 @@ def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
         phot["z"] = 0
     if "free_redshift" not in phot:
         phot["free_redshift"] = True
+        print("Fitting for redshift...")
 
     # set default run_params, then overload
     run_params = {
@@ -803,6 +807,10 @@ def read_h5(hfile, plot=True):
         zplot = phot["z"]
     
     wspec = sps.wavelengths
+
+    # calculate SFR
+    sfr = sfh.parametric_sfr(times=cosmo.lookback_time(phot["z"]).to('Gyr').value, sfh=1, mass=10 ** fit_info["medpos"]["mass"][0], tage=fit_info["medpos"]["tage"][0], tau=fit_info["medpos"]["tau"][0])
+    fit_info["medpos"]["sfr"] = [sfr]  # TODO: add bounds
     
     if plot:
         # dict with latex labels for the plot legend
@@ -902,7 +910,9 @@ def read_h5(hfile, plot=True):
     return (wspec * (1 + zplot), mi2mg(mspec_medpos)), (obs['phot_wave'], obs['mags'], mi2mg(mphot)), fit_info['medpos']
 
 
-
+def calc_mstarsfr(hfile):
+    """ Wrap up some calcs for convenient access to Mstar and SFR.
+    """
 
 
 def run_fit2(phot, hfile="results.h5", emcee=True, **params):
