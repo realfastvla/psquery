@@ -1,21 +1,28 @@
 # psquery
-Query catalogs with MAST API. Basic query is a cone search with arguments of (RA, Dec, radius). 
+Query astronomical catalogs with Python APIs or libraries. Also some support for optical SED modeling.
 
-Currently, set ups as two modules for PS1 and 2MASS queries.
-
-Returns either astropy coordinate objects or PS1 query result.
-
-See notebook for example execution.
+The best supported use case is a cone search in radio and optical catalogs. See `psquery_cone_examples.ipynb` for sample of cone search queries.
 
 ## Dependencies
 - astropy
+- astroquery
 - urllib
 - requests
 - pandas
-- astroquery
+
+Optional (for specific data sets):
 - pyvo
+- noaodatalab
+- cfod
 - mastcasjobs: `pip install git+https://github.com/rlwastro/mastcasjobs@master`
+
+Optional (for SED modeling):
+- sedpy
+- extinction
+- dustmaps
 
 ## Installation
 
 `python setup.py install`
+
+mastcasjobs may require some hand holding. sedpy requires lots of hand holding (only needed for optical SED modeling).
