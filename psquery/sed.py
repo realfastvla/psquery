@@ -36,9 +36,12 @@ lamd = {
     "wise_w2": 46180.0,
     "wise_w3": 120820.0,
     "wise_w4": 221940.0,
-    'decam_g':4770,
-    'decam_r':6371.3,
-    'decam_z':9157.9
+    "decam_g": 4770,
+    "decam_r": 6371.3,
+    "decam_z": 9157.9,
+    "twomass_J": 12350.,
+    "twomass_H": 16620.,
+    "twomass_Ks": 21590:
 }
 
 
