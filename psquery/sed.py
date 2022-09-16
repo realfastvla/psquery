@@ -41,7 +41,7 @@ lamd = {
     "decam_z": 9157.9,
     "twomass_J": 12350.,
     "twomass_H": 16620.,
-    "twomass_Ks": 21590:
+    "twomass_Ks": 21590.
 }
 
 
