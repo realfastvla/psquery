@@ -82,7 +82,7 @@ from psquery.astronquery import cone_lotss, cone_tgss
 from psquery.casdaquery import cone_racs
 from psquery.heasarcquery import cone_first, cone_nvss, cone_wenss, cone_vlssr
 from psquery.irsaquery import cone_wise, cone_twomass
-from psquery.mastquery import cone_ps1strm, cone_ps1psc, cone_emline, cone_galaxymass, cone_legacy
+from psquery.mastquery import cone_ps1strm, cone_ps1psc, cone_emline, cone_galaxymass
 from psquery.noaoquery import cone_legacy
 from psquery.psquery import cone_ps1
 from psquery.vizierquery import cone_gleam, cone_xmm

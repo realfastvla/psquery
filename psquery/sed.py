@@ -550,7 +550,6 @@ def build_obs(
     phot=None,
     filternames=None,
     mag_err_clip=0.05,
-    standard=["galex", "ps", "sdss", "wise", "decam"],
     **extras
 ):
     """Build a dictionary of observational data.
@@ -558,14 +557,15 @@ def build_obs(
     phot = table or dictionary with photometry. Should already be extinction corrected.
     Upper limits have flux=0 and "err" equal to the limit (in what units?).
     filternames is list of bands and must match name in sedpy.
-    If None, names inferred from phot using standard root names.
+    If None, names selected from the set available in sedpy.
 
     returns obs: A dictionary of observational data to use in the fit.
     """
 
     obs = {}
     if filternames is None:
-        sel = lambda x: any([(st in x.lower()) for st in standard if "err" not in x])
+        available = py.observate.list_available_filters()
+        sel = lambda x: any([(st in x.lower()) for st in available if "err" not in x])
         filternames = list(filter(sel, phot.keys()))
     flt_use = np.array([], dtype="S20")
     data_use, edata_use = np.array([]), np.array([])
