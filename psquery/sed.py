@@ -837,8 +837,8 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
     fit_info["medpos"]["sfr"] = [sfr]  # TODO: add bounds
 
     # get rest-frame properties
-    specmodel = (build_model(usesedmodel=False, **run_params),)[0]
-    fit_info["medpos"]["Mabs"] = mi2mg(model.absolute_rest_maggies(obs["filters"]))
+    specmodel0 = (build_model(usesedmodel=False, **run_params),)[0]
+    fit_info["medpos"]["Mabs"] = mi2mg(specmodel0.absolute_rest_maggies(obs["filters"]))
     
     if plot:
         # dict with latex labels for the plot legend
