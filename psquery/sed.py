@@ -187,7 +187,9 @@ def get_phot(radec, radius, legacy=False, galaxy=False, **kwargs):
 
 
 def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
-    """Wrap the obs/model/sps generation and run for given photometry dict."""
+    """
+    Wrap the obs/model/sps generation and run for given photometry dict.
+    """
 
     if "z" not in phot:
         phot["z"] = 0
@@ -564,7 +566,7 @@ def build_obs(
 
     obs = {}
     if filternames is None:
-        available = py.observate.list_available_filters()
+        available = sedpy.observate.list_available_filters()
         sel = lambda x: any([(st in x.lower()) for st in available if "err" not in x])
         filternames = list(filter(sel, phot.keys()))
     flt_use = np.array([], dtype="S20")
@@ -625,6 +627,7 @@ def build_model(
     add_dust_emission=False,
     no_dust=False,
     model_template="parasfh",
+    usesedmodel=True,
     **extras
 ):
 
@@ -701,15 +704,23 @@ def build_model(
         model_params.update(TemplateLibrary["dust_emission"])
 
     # Now instantiate the model object using this dictionary of parameter specifications
-    model = sedmodel.SedModel(model_params)
-
+    if usesedmodel:
+        model = sedmodel.SedModel(model_params)
+    else:
+        model = sedmodel.SpecModel(model_params)
+        
     return model
 
 
 def mi2mg(maggies):
+    # maggies to mags
     return -2.5 * np.log10(maggies)
 
-def read_h5(hfile, plot=True):
+def mi2fl(maggies):
+    # maggies to Jy
+    return maggies * 3631
+
+def read_h5(hfile, plot=True, getspec=False, getmop=False):
     # grab results (dictionary), the obs dictionary, and our corresponding models
     # When using parameter files set `dangerous=True`
     import prospect.io.read_results as reader
@@ -717,7 +728,6 @@ def read_h5(hfile, plot=True):
     result, obs, model = reader.results_from(hfile, dangerous=False)
     run_params = result['run_params']
     model = (build_model(**run_params),)[0]
-    
     sps = CSPSpecBasis(zcontinuous=1,dust_type=2, imf_type=1, 
                        add_neb_emission=run_params["add_dust_emission"],
                        compute_vega_mags=False,
@@ -727,6 +737,15 @@ def read_h5(hfile, plot=True):
     # get the mean spectrum
     theta_medpos = np.median(result["chain"][:, -1, :], axis=0)
     mspec_medpos, mphot_medpos, _ = model.mean_model(theta_medpos, obs, sps=sps)
+
+    if getmop:
+        return model, obs, sps
+
+    if getspec:
+        return sps.wavelengths, mspec_medpos
+
+#    distmod = cosmo.distmod(phot["z"])
+#    fit_info["medpos"]["Mabs"] = [ph-distmod for ph in mphot_medpos]
 
     # collect MCMC results
     specphot_obs = []
@@ -810,14 +829,16 @@ def read_h5(hfile, plot=True):
     else:
         zplot = phot["z"]
     
-    wspec = sps.wavelengths
-
     # calculate SFR
     sfr = sfh.parametric_sfr(times=cosmo.lookback_time(phot["z"]).to('Gyr').value, sfh=1,
                              mass=10**fit_info["medpos"]["mass"][0],
                              tage=fit_info["medpos"]["tage"][0],
                              tau=fit_info["medpos"]["tau"][0])[0]
     fit_info["medpos"]["sfr"] = [sfr]  # TODO: add bounds
+
+    # get rest-frame properties
+    specmodel = (build_model(usesedmodel=False, **run_params),)[0]
+    fit_info["medpos"]["Mabs"] = mi2mg(model.absolute_rest_maggies(obs["filters"]))
     
     if plot:
         # dict with latex labels for the plot legend
@@ -914,7 +935,7 @@ def read_h5(hfile, plot=True):
         )
         plt.show()
     
-    return (wspec * (1 + zplot), mi2mg(mspec_medpos)), (obs['phot_wave'], obs['mags'], mi2mg(mphot)), fit_info['medpos']
+    return (wspec * (1 + zplot), mi2mg(mspec_medpos)), (obs['phot_wave'], obs['mags'], obs['filternames'], mi2mg(mphot)), fit_info['medpos']
 
 
 def run_fit2(phot, hfile="results.h5", emcee=True, **params):
