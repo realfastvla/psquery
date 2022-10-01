@@ -644,7 +644,7 @@ def build_model(
     # This is a dictionary of dictionaries, keyed by parameter name
 #    model_params = TemplateLibrary["ssp"]
     model_params = TemplateLibrary["parametric_sfh"]
-    model_params["sfh"]["init"] = 1  # this is 4 in template
+    model_params["sfh"]["init"] = 1  # this is 4 in template, 1 from jean
     model_params["tburst"] = {
         "N": 1,
         "isfree": False,
@@ -727,7 +727,7 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
 
     result, obs, model = reader.results_from(hfile, dangerous=False)
     run_params = result['run_params']
-    model = (build_model(**run_params),)[0]
+    model = (build_model(usesedmodel=True, **run_params),)[0]
     sps = CSPSpecBasis(zcontinuous=1,dust_type=2, imf_type=1, 
                        add_neb_emission=run_params["add_dust_emission"],
                        compute_vega_mags=False,
@@ -743,9 +743,6 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
 
     if getspec:
         return sps.wavelengths, mspec_medpos
-
-#    distmod = cosmo.distmod(phot["z"])
-#    fit_info["medpos"]["Mabs"] = [ph-distmod for ph in mphot_medpos]
 
     # collect MCMC results
     specphot_obs = []
@@ -773,6 +770,7 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
     theta = model.theta.copy()
     _, _, _ = model.mean_model(theta, obs, sps=sps)
     sps_pickled = sps.ssp
+    wspec = sps.wavelengths
 
     # loop again to get uncertainties
     for i, lbl in enumerate(result["theta_labels"]):
@@ -837,9 +835,13 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
     fit_info["medpos"]["sfr"] = [sfr]  # TODO: add bounds
 
     # get rest-frame properties
-    specmodel0 = (build_model(usesedmodel=False, **run_params),)[0]
-    fit_info["medpos"]["Mabs"] = mi2mg(specmodel0.absolute_rest_maggies(obs["filters"]))
-    
+    try:
+        M_u, M_r = mi2mg(model.absolute_rest_maggies(sedpy.observate.load_filters(['sdss_u0', 'sdss_r0'])))
+        fit_info["medpos"]["M_r"] = M_r
+        fit_info["medpos"]["u-r"] = M_u - M_r
+    except AttributeError:
+        pass
+        
     if plot:
         # dict with latex labels for the plot legend
         theta_lbl_latex = {}
@@ -860,7 +862,8 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
         for i in range(result["run_params"]["nwalkers"]):
             mspec, mphot = specphot_obs[i]
             plt.plot(
-                sps_pickled.wavelengths * (1 + zplot),
+                #sps_pickled.wavelengths * (1 + zplot),
+                wspec * (1 + zplot),
                 mi2mg(mspec),
                 lw=0.7,
                 color=colormap(0.2),
