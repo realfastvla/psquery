@@ -663,7 +663,8 @@ def build_model(
     model_params["mass"]["init"] = 10 ** (9)
     model_params["tage"]["prior"] = priors.TopHat(mini=0.1, maxi=12.5)
     model_params["dust2"]["prior"] = priors.TopHat(mini=0.0, maxi=1)
-    model_params["mass"]["prior"] = priors.LogUniform(mini=1e7, maxi=1e12)
+#    model_params["mass"]["prior"] = priors.LogUniform(mini=1e7, maxi=1e12)
+    model_params["mass"]["prior"] = priors.LogUniform(mini=2e8, maxi=1e12)
 
     if "tau" in model_params:
         model_params["tau"]["prior"] = priors.LogUniform(mini=0.1, maxi=1)
@@ -671,7 +672,7 @@ def build_model(
     # If we are going to be using emcee, it is useful to provide a
     # minimum scale for the cloud of walkers (the default is 0.1)
     model_params["mass"]["init_disp"] = 1e8
-    model_params["mass"]["disp_floor"] = 1e7
+    model_params["mass"]["disp_floor"] = 1e8
     model_params["tage"]["init_disp"] = 3
     model_params["tage"]["disp_floor"] = 2
     model_params["logzsol"]["init_disp"] = 1
@@ -727,7 +728,7 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
 
     result, obs, model = reader.results_from(hfile, dangerous=False)
     run_params = result['run_params']
-    model = (build_model(usesedmodel=True, **run_params),)[0]
+    model = (build_model(usesedmodel=False, **run_params),)[0]
     sps = CSPSpecBasis(zcontinuous=1,dust_type=2, imf_type=1, 
                        add_neb_emission=run_params["add_dust_emission"],
                        compute_vega_mags=False,
