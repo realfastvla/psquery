@@ -20,7 +20,7 @@ from astroquery.mast import Catalogs
 from dustmaps.sfd import SFDQuery
 from extinction import fitzpatrick99
 
-from . import irsaquery, psquery, noaoquery
+from . import irsaquery, psquery, noaoquery, mastquery
 
 cosmo = cosmology.Planck18
 
@@ -219,7 +219,7 @@ def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
     run_params["optimize"] = True
     run_params["min_method"] = "lm"
     run_params["nmin"] = 10  # number of draws to start from
-    for kk, vv in params:
+    for kk, vv in params.items():
         run_params[kk] = vv
     run_params["emcee"] = emcee
 
@@ -578,8 +578,9 @@ def build_obs(
             edata_use = np.append(edata_use, phot[k + "_err"])
 
     edata_use = np.array(edata_use)
-    edata_use = np.clip(edata_use, mag_err_clip, 10)
+#    edata_use = np.clip(edata_use, mag_err_clip, 10)
     obs["islim"] = edata_use <= 0
+    print(obs["islim"], edata_use)
 
     obs["filternames"] = filternames
     obs["filters"] = sedpy.observate.load_filters(filternames)
@@ -837,8 +838,11 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
 
     # get rest-frame properties
     try:
-        M_u, M_r = mi2mg(model.absolute_rest_maggies(sedpy.observate.load_filters(['sdss_u0', 'sdss_r0'])))
+        M_u, M_g, M_r = mi2mg(model.absolute_rest_maggies(sedpy.observate.load_filters(['sdss_u0',
+                                                                                   'sdss_g0',
+                                                                                   'sdss_r0'])))
         fit_info["medpos"]["M_r"] = M_r
+        fit_info["medpos"]["g-r"] = M_g - M_r
         fit_info["medpos"]["u-r"] = M_u - M_r
     except AttributeError:
         pass

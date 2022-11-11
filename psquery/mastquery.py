@@ -12,6 +12,7 @@ import numpy as np
 from astropy import coordinates, units
 from astropy.io import ascii
 from astropy.table import Table
+from astroquery import mast
 
 from . import get_coord
 
@@ -207,3 +208,17 @@ def cone_ps1psc(radec, radius=5/3600):
     tab = jobs.quick(query, task_name="python psc cone search")
 
     return tab
+
+
+def cone_galex(radec, radius):
+    """cone search in GALEX catalog in mast via casjobs.
+    radec as usual. radius in degres.
+    """
+
+    ra, dec = get_coord(radec, ret="radec")
+
+    galex = mast.Catalogs.query_object(
+        "{0}  {1}".format(ra, dec), radius=radius/3600, catalog="Galex"
+    )
+
+    return galex
