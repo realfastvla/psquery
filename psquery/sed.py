@@ -830,7 +830,7 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
         zplot = phot["z"]
     
     # calculate SFR
-    sfr = sfh.parametric_sfr(times=cosmo.lookback_time(phot["z"]).to('Gyr').value, sfh=1,
+    sfr = sfh.parametric_sfr(times=0, sfh=1,
                              mass=10**fit_info["medpos"]["mass"][0],
                              tage=fit_info["medpos"]["tage"][0],
                              tau=fit_info["medpos"]["tau"][0])[0]
