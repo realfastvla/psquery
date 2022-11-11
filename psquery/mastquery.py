@@ -212,13 +212,13 @@ def cone_ps1psc(radec, radius=5/3600):
 
 def cone_galex(radec, radius):
     """cone search in GALEX catalog in mast via casjobs.
-    radec as usual. radius in degres.
+    radec as usual. radius in degrees.
     """
 
     ra, dec = get_coord(radec, ret="radec")
 
     galex = mast.Catalogs.query_object(
-        "{0}  {1}".format(ra, dec), radius=radius/3600, catalog="Galex"
+        "{0}  {1}".format(ra, dec), radius=radius, catalog="Galex"
     )
 
     return galex
