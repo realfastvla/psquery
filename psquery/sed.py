@@ -58,7 +58,9 @@ def extinct(radec, phot):
             wav = np.array([lamd[i]])
             new_phot[i] = phot[i] - sfd(c) * fitzpatrick99(wav, 3.1)[0]
         else:
+            print(f"Band {i} not in lamd. No extinction correction applied.")
             new_phot[i] = phot[i]
+
     return new_phot
 
 
@@ -567,7 +569,7 @@ def build_obs(
     obs = {}
     if filternames is None:
         available = sedpy.observate.list_available_filters()
-        sel = lambda x: any([(st in x.lower()) for st in available if "err" not in x])
+        sel = lambda x: any([(st in x) for st in available if "err" not in x])
         filternames = list(filter(sel, phot.keys()))
     flt_use = np.array([], dtype="S20")
     data_use, edata_use = np.array([]), np.array([])
