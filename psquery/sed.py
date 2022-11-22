@@ -151,6 +151,10 @@ def get_phot(radec, radius, legacy=False, galaxy=False, **kwargs):
             phot["ps_y"] = ps1[11]
             phot["ps_y_err"] = ps1[12]
 
+    # 2mass: Vega to AB correction
+#    J => J + 0.9
+#    H => H + 1.39
+#    Ks => Ks + 1.85
 
     # adding WISE data (need to have WISE result and WISE position within ps1 radius)
     if len(wise) != 0 and wise[0]["dist"] < radius:
