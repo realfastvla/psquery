@@ -836,8 +836,8 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
         zplot = phot["z"]
     
     # calculate SFR
-    sfr = sfh.parametric_sfr(times=0, sfh=1,
-                             mass=10**fit_info["medpos"]["mass"][0],
+    sfr = sfh.parametric_sfr(times=cosmo.lookback_time(phot["z"]).value,
+                             sfh=1, mass=10**fit_info["medpos"]["mass"][0],
                              tage=fit_info["medpos"]["tage"][0],
                              tau=fit_info["medpos"]["tau"][0])[0]
     fit_info["medpos"]["sfr"] = [sfr]  # TODO: add bounds
@@ -845,8 +845,8 @@ def read_h5(hfile, plot=True, getspec=False, getmop=False):
     # get rest-frame properties
     try:
         M_u, M_g, M_r = mi2mg(model.absolute_rest_maggies(sedpy.observate.load_filters(['sdss_u0',
-                                                                                   'sdss_g0',
-                                                                                   'sdss_r0'])))
+                                                                                        'sdss_g0',
+                                                                                        'sdss_r0'])))
         fit_info["medpos"]["M_r"] = M_r
         fit_info["medpos"]["g-r"] = M_g - M_r
         fit_info["medpos"]["u-r"] = M_u - M_r
