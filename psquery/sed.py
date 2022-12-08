@@ -39,6 +39,8 @@ lamd = {
     "decam_g": 4770,
     "decam_r": 6371.3,
     "decam_z": 9157.9,
+    "WIRC_J": 12350.,
+    "WIRC_H": 16620.,
     "twomass_J": 12350.,
     "twomass_H": 16620.,
     "twomass_Ks": 21590.
@@ -578,10 +580,10 @@ def build_obs(
     flt_use = np.array([], dtype="S20")
     data_use, edata_use = np.array([]), np.array([])
     for k in filternames:
-        if phot[k] != 0:
-            flt_use = np.append(flt_use, k)
-            data_use = np.append(data_use, phot[k])
-            edata_use = np.append(edata_use, phot[k + "_err"])
+#        if phot[k] != 0:
+        flt_use = np.append(flt_use, k)
+        data_use = np.append(data_use, phot[k])
+        edata_use = np.append(edata_use, phot[k + "_err"])
 
     edata_use = np.array(edata_use)
 #    edata_use = np.clip(edata_use, mag_err_clip, 10)
