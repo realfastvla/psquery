@@ -97,7 +97,7 @@ def submitJob(credential, sql, out_format='csv', release_version='pdr3-citus-col
     return job
 
 
-def httpJsonPost(url, data, version = '20190514.1'):
+def httpJsonPost(url, data, version=20190514.1):
     data['clientVersion'] = version
     postData = json.dumps(data)
     return httpPost(url, postData, {'Content-type': 'application/json'})
