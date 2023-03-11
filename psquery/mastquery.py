@@ -193,7 +193,7 @@ def cone_ps1_casjobs(radec, radius=5/3600, ndet=1, nr=1, query="MeanObject"):
 
 def cone_ps1psc(radec, radius=5/3600):
     """cone search in ps1 PSC via casjobs (similar to mastquery PS1STRM function)
-    ra, dec in degrees, radius in degres.
+    ra, dec in degrees, radius in degrees.
     See Tachibana & Miller (2018; https://iopscience.iop.org/article/10.1088/1538-3873/aae3d9).
     Optimal extended source has ps_score<0.83.
     """
@@ -201,7 +201,7 @@ def cone_ps1psc(radec, radius=5/3600):
     ra, dec = get_coord(radec, ret="radec")
 
     query = f"""select p.objID, p.ps_score, p.raMean, p.decMean\nfrom pointsource_magnitudes_view as p\ninner join fGetNearbyObjEq({ra}, {dec}, {radius}) as r on p.objid=r.objid and p.primaryDetection = 1""".format(
-        ra, dec, radius*60
+        ra, dec, radius*3600
     )
 
     jobs = mastcasjobs.MastCasJobs(context="HLSP_PS1_PSC")
