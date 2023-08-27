@@ -1,5 +1,6 @@
 from astropy import coordinates, units
 from astroquery.utils.tap.core import TapPlus
+import pyvo as vo
 
 try:
     from astroquery import vizier
@@ -44,3 +45,20 @@ def cone_xmm(radec, radius, selectcol=None, table='IX/65/xmm4d11s'):
             return tab
     else:
         return None
+
+def cone_vlass(radec, radius):
+    """
+    """
+
+    co = get_coord(radec, ret='skycoord')
+    size = radius*units.deg
+    scs_srv = vo.dal.SCSService("http://vizier.cds.unistra.fr/viz-bin/conesearch/J/ApJS/255/30/comp?")
+    vlass_table = scs_srv.search(pos=co, radius=size).to_table()
+
+    tab = vlass_table[['CompName', 'RAJ2000', 'DEJ2000', 'e_RAJ2000', 'e_DEJ2000', 'Ftot', 'e_Ftot', 'Fpeak', 'e_Fpeak', 'DupFlag', 'QualFlag']]
+    tab.rename_column('CompName', 'vlassname')
+    tab.rename_column("RAJ2000", "ra")
+    tab.rename_column("DEJ2000", "dec")
+    sel = (tab["DupFlag"] < 2) & ((tab["QualFlag"] == 0) | (tab["QualFlag"] == 4))
+
+    return tab[sel]

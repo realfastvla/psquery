@@ -85,7 +85,6 @@ from psquery.irsaquery import cone_wise, cone_twomass
 from psquery.mastquery import cone_ps1strm, cone_ps1psc, cone_emline, cone_galaxymass, cone_galex
 from psquery.noaoquery import cone_legacy
 from psquery.psquery import cone_ps1
-from psquery.vizierquery import cone_gleam, cone_xmm
+from psquery.vizierquery import cone_gleam, cone_xmm, cone_vlass
 from psquery.chandraquery import cone_chandra
-from psquery.catquery import cone_vlass
-# TODO: add cadc/vlass and hsc queries with pyvo(?)
+# TODO: add hsc queries with pyvo(?)
