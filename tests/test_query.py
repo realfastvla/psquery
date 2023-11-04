@@ -1,6 +1,6 @@
 import pytest
 from astropy import coordinates
-from psquery import get_coord, astronquery, casdaquery, heasarcquery, irsaquery, mastquery, noaoquery, psquery, vizierquery, radio_survey_data, chimequery
+from psquery import get_coord, sed, astronquery, casdaquery, heasarcquery, irsaquery, mastquery, noaoquery, psquery, vizierquery, radio_survey_data, chimequery
 
 radecn = '13:31:08.288,30:30:32.9'
 #'19:58:17.74, +34:34:38.7'
@@ -71,9 +71,10 @@ def test_outside():
     assert tab is None, 'query outside tgss region should find nothing'
 
 def test_wise():
-    pass
-#psquery/irsaquery.py:def cone_wise(
-#psquery/irsaquery.py:def cone_pyvo(ra, dec, radius=5, table="allwise_p3as_psd"):
+    tab = irsaquery.cone_wise(radecn, radius)
+    assert len(tab)
+ 
+    #psquery/irsaquery.py:def cone_pyvo(ra, dec, radius=5, table="allwise_p3as_psd"):
 
 def test_ps1strm():
     tab = mastquery.cone_ps1strm(radecn, radius)
@@ -98,9 +99,20 @@ def test_ps1():
     assert len(tab)
 
 def test_sed():
-    pass
+    """ test get_phot from sed.py module
+    """
+    tab = sed.get_phot(radecn, radius)
+    print(len(tab))
+    assert len(tab)
+
+def test_extinct():
+    """ test extinct function from sed.py module
+    """
+    tab = sed.extinct(radecn, radius)
+    print(len(tab))
+    assert len(tab)
+
 #psquery/sed.py:def extinct(ra, dec, phot):
-#psquery/sed.py:def get_phot(ra, dec, radius, **kwargs):
 #psquery/sed.py:def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
 
 def test_twomass():
