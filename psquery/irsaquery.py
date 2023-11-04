@@ -1,5 +1,5 @@
 try:
-    from astroquery import irsa
+    from astroquery.ipac import irsa
 except ImportError:
     print("astroquery not available. Cannot use irsaquery.")
 

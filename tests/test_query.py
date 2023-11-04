@@ -108,11 +108,10 @@ def test_sed():
 def test_extinct():
     """ test extinct function from sed.py module
     """
-    tab = sed.extinct(radecn, radius)
+    tab = sed.extinct(radecn, 'r')
     print(len(tab))
     assert len(tab)
 
-#psquery/sed.py:def extinct(ra, dec, phot):
 #psquery/sed.py:def run_fit(phot, hfile="results.h5", emcee=False, plot=True, **params):
 
 def test_twomass():
